@@ -51,7 +51,6 @@ type Metrics struct {
 }
 
 func (m *Metrics) UpdateMetrics(duration int) {
-	//var m Metrics
 	var rtm runtime.MemStats
 	var interval = time.Duration(duration) * time.Second
 	var PollCount = 0
@@ -61,23 +60,18 @@ func (m *Metrics) UpdateMetrics(duration int) {
 	for {
 		<-time.After(interval)
 		PollCount++
-		// Read full mem stats
 		runtime.ReadMemStats(&rtm)
 
-		// Number of goroutines
 		m.NumGoroutine = gauge(runtime.NumGoroutine())
 
-		// Misc memory stats
 		m.Alloc = gauge(rtm.Alloc)
 		m.TotalAlloc = gauge(rtm.TotalAlloc)
 		m.Sys = gauge(rtm.Sys)
 		m.Mallocs = gauge(rtm.Mallocs)
 		m.Frees = gauge(rtm.Frees)
 
-		// Live objects = Mallocs - Frees
 		m.LiveObjects = m.Mallocs - m.Frees
 
-		// GC Stats
 		m.PauseTotalNs = gauge(rtm.PauseTotalNs)
 		m.NumGC = gauge(rtm.NumGC)
 
@@ -101,15 +95,18 @@ func (mertics *Metrics) PostMetrics(serverAddr string, duration int) {
 			var uri string
 			if field != "PollCount" {
 				uri = "update/gauge/" + field + "/" + strconv.FormatFloat(val, 'f', -1, 64)
+
 			} else {
 				uri = "update/counter/" + field + "/" + strconv.FormatFloat(val, 'f', -1, 64)
 			}
 			request, err := http.Post(serverAddr+uri, "text/plain", bytes.NewReader([]byte(strconv.FormatFloat(val, 'f', -1, 64))))
+			//request, err := http.PostForm(serverAddr+uri, url.Values{"key": {field}, "id": {"123"}})
 			if err != nil {
 				log.Fatal(err)
 			}
 			request.Body.Close()
-			fmt.Println(serverAddr + uri)
+			//fmt.Println(serverAddr + uri)
+			fmt.Println(field)
 		}
 	}
 }

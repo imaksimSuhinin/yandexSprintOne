@@ -21,10 +21,10 @@ func StartClient() {
 	var metrics = localMetrics.Metrics{}
 	data := setData()
 	client := &http.Client{}
-	err, response := setHeader(localConst.ClientEndpoint, data, client)
+	err, response := setHeader(localConst.ClientEndpoint+localConst.Port, data, client)
 	defer response.Body.Close()
 	readDataFromResponse(err, response)
-	getMetrics(metrics, localConst.ClientEndpoint)
+	getMetrics(metrics, localConst.ClientEndpoint+localConst.Port)
 }
 
 func getMetrics(metrics localMetrics.Metrics, endpoint string) {
@@ -57,7 +57,7 @@ func setHeader(endpoint string, data url.Values, client *http.Client) (error, *h
 func setData() url.Values {
 	data := url.Values{}
 	reader := localMetrics.Metrics{}.Mallocs
-	s := fmt.Sprintf("%f", reader) // s == "123.456000"
+	s := fmt.Sprintf("%f", reader)
 	data.Set("url", s)
 	return data
 }
