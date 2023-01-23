@@ -28,8 +28,8 @@ func StartClient() {
 }
 
 func getMetrics(metrics localMetrics.Metrics, endpoint string) {
-	go metrics.UpdateMetrics(3)
-	go metrics.PostMetrics(endpoint, 5)
+	go metrics.UpdateMetrics(2)
+	go metrics.PostMetrics(endpoint, 4)
 	for {
 		time.Sleep(time.Second)
 	}
