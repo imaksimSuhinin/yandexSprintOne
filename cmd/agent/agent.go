@@ -1,12 +1,11 @@
 package main
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"time"
 )
 
 func main() {
@@ -33,28 +32,41 @@ func main() {
 	//if resp.StatusCode() != 200 {
 	//	errors.New("HTTP Status != 200")
 	//}
-	client := &http.Client{}
-	var body = []byte(`{"message":"Hello"}`)
-	request, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:8080/", bytes.NewBuffer(body))
-	if err != nil {
-		errors.New("HTTP Status != 200")
+
+	//client := &http.Client{}
+	//var body = []byte(`{"message":"Hello"}`)
+	//request, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:8080/", bytes.NewBuffer(body))
+	//if err != nil {
+	//	errors.New("HTTP Status != 200")
+	//}
+	//
+	//request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	//
+	//// отправляем запрос
+	//response, err := client.Do(request)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	os.Exit(1)
+	//}
+	//defer response.Body.Close()
+	//
+	//_body, _err := io.ReadAll(response.Body)
+	//if _err != nil {
+	//	fmt.Println(_err)
+	//	os.Exit(1)
+	//}
+	//// и печатаем его
+	//fmt.Println(string(_body))
+
+	client := http.Client{
+		Timeout: 6 * time.Second,
 	}
-
-	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
-	// отправляем запрос
-	response, err := client.Do(request)
+	resp, err := client.Get("http://127.0.0.1:8080")
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
+		return
 	}
-	defer response.Body.Close()
+	defer resp.Body.Close()
+	io.Copy(os.Stdout, resp.Body)
 
-	_body, _err := io.ReadAll(response.Body)
-	if _err != nil {
-		fmt.Println(_err)
-		os.Exit(1)
-	}
-	// и печатаем его
-	fmt.Println(string(_body))
 }
