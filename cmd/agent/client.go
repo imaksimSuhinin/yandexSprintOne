@@ -24,7 +24,7 @@ func main() {
 			"value": "value",
 		}).
 		SetHeader("Content-Type", "text/plain").
-		Post("http://{host}:{port}/update/{type}/{name}/{value}")
+		Post("http://{host}:{port}/")
 
 	if err != nil {
 
