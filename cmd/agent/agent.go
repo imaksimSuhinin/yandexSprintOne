@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"time"
@@ -61,12 +60,13 @@ func main() {
 	client := http.Client{
 		Timeout: 6 * time.Second,
 	}
-	resp, err := client.Get("http://127.0.0.1:8080")
+
+	req, _ := http.NewRequest("GET", "http://127.0.0.1:8080/", nil)
+
+	req.Header.Add("If-None-Match", `W/"wyzzy"`)
+	_, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err)
-		return
+		os.Exit(1)
 	}
-	defer resp.Body.Close()
-	io.Copy(os.Stdout, resp.Body)
-
 }
