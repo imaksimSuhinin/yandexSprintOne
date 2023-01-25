@@ -61,9 +61,9 @@ func main() {
 		Timeout: 6 * time.Second,
 	}
 
-	req, _ := http.NewRequest("GET", "http://127.0.0.1:8080/", nil)
+	req, _ := http.NewRequest("POST", "http://127.0.0.1:8080/", nil)
 
-	req.Header.Add("If-None-Match", `W/"wyzzy"`)
+	req.Header.Add("Content-Type", "text/plain")
 	_, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err)
