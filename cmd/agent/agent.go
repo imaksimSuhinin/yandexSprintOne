@@ -29,7 +29,7 @@ func StartClient() {
 
 func getMetrics(metrics localMetrics.Metrics, endpoint string) {
 	go metrics.UpdateMetrics(2)
-	go metrics.PostMetrics(endpoint, 4)
+	go metrics.PostMetrics(endpoint, 10)
 	for {
 		time.Sleep(time.Second)
 	}
