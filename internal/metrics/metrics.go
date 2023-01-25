@@ -1,12 +1,9 @@
 package runtime_loc
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"math/rand"
-	"net/http"
 	"runtime"
 	"strconv"
 	"time"
@@ -99,14 +96,14 @@ func (mertics *Metrics) PostMetrics(serverAddr string, duration int) {
 			} else {
 				uri = "update/counter/" + field + "/" + strconv.FormatFloat(val, 'f', -1, 64)
 			}
-			request, err := http.Post(serverAddr+uri, "text/plain", bytes.NewReader([]byte(strconv.FormatFloat(val, 'f', -1, 64))))
-			//request, err := http.PostForm(serverAddr+uri, url.Values{"key": {field}, "id": {"123"}})
-			if err != nil {
-				log.Fatal(err)
-			}
-			request.Body.Close()
-			//fmt.Println(serverAddr + uri)
-			fmt.Println(field)
+			//request, err := http.Post(serverAddr+uri, "text/plain", bytes.NewReader([]byte(strconv.FormatFloat(val, 'f', -1, 64))))
+			//
+			//if err != nil {
+			//	log.Fatal(err)
+			//}
+			//request.Body.Close()
+
+			fmt.Println(uri)
 		}
 	}
 }

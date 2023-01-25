@@ -30,9 +30,10 @@ func StartClient() {
 		SetRetryMaxWaitTime(90 * time.Second)
 
 	err, response := setHeader(localConst.ClientEndpoint+localConst.Port, data, client.GetClient())
-	defer response.Body.Close()
+
 	readDataFromResponse(err, response)
 	getMetrics(metrics, localConst.ClientEndpoint+localConst.Port)
+	defer response.Body.Close()
 }
 
 func getMetrics(metrics localMetrics.Metrics, endpoint string) {
