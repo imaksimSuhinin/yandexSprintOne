@@ -1,34 +1,52 @@
 package main
 
 import (
+	"bytes"
 	"errors"
-	"github.com/go-resty/resty/v2"
-	"strconv"
-	"time"
+	"fmt"
+	"net/http"
+	"os"
 )
 
 func main() {
-	client := resty.New()
-
-	client.
-		SetRetryCount(3).
-		SetRetryWaitTime(10 * time.Second)
-
-	resp, err := client.R().
-		SetPathParams(map[string]string{
-			"host":  "127.0.0.1",
-			"port":  strconv.Itoa(8080),
-			"type":  "type",
-			"name":  "name",
-			"value": "value",
-		}).
-		SetHeader("Content-Type", "text/plain").
-		Post("http://{host}:{port}/")
-
+	//client := resty.New()
+	//
+	//client.
+	//	SetRetryCount(3).
+	//	SetRetryWaitTime(10 * time.Second)
+	//
+	//resp, err := client.R().
+	//	SetPathParams(map[string]string{
+	//		"host":  "127.0.0.1",
+	//		"port":  strconv.Itoa(8080),
+	//		"type":  "type",
+	//		"name":  "name",
+	//		"value": "value",
+	//	}).
+	//	SetHeader("Content-Type", "text/plain").
+	//	Post("http://{host}:{port}/")
+	//
+	//if err != nil {
+	//
+	//}
+	//if resp.StatusCode() != 200 {
+	//	errors.New("HTTP Status != 200")
+	//}
+	client := &http.Client{}
+	var body = []byte(`{"message":"Hello"}`)
+	request, err := http.NewRequest(http.MethodPost, "http://localhost:8080/", bytes.NewBuffer(body))
 	if err != nil {
-
-	}
-	if resp.StatusCode() != 200 {
 		errors.New("HTTP Status != 200")
 	}
+
+	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	// отправляем запрос
+	response, err := client.Do(request)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer response.Body.Close()
+
 }
