@@ -13,24 +13,24 @@ import (
 )
 
 func main() {
-	// адрес сервиса (как его писать, расскажем в следующем уроке)
-	endpoint := "http://localhost:8080/"
-	// контейнер данных для запроса
+
+	endpoint := "http://localhost:8080"
+
 	data := url.Values{}
-	// приглашение в консоли
+
 	fmt.Println("Введите длинный URL")
-	// открываем потоковое чтение из консоли
+
 	reader := bufio.NewReader(os.Stdin)
-	// читаем строку из консоли
+
 	long, err := reader.ReadString('\n')
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 	long = strings.TrimSuffix(long, "\n")
-	// заполняем контейнер данными
+
 	data.Set("url", long)
-	// конструируем HTTP-клиент
+
 	client := &http.Client{}
 	// конструируем запрос
 	// запрос методом POST должен, кроме заголовков, содержать тело
@@ -59,6 +59,6 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	// и печатаем его
+
 	fmt.Println(string(body))
 }
