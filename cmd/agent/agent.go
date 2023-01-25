@@ -3,12 +3,14 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/go-resty/resty/v2"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"strconv"
 	"time"
+
 	localConst "yandexSprintOne/internal/const"
 	localMetrics "yandexSprintOne/internal/metrics"
 )
@@ -20,16 +22,22 @@ func main() {
 func StartClient() {
 	var metrics = localMetrics.Metrics{}
 	data := setData()
-	client := &http.Client{}
-	err, response := setHeader(localConst.ClientEndpoint+localConst.Port, data, client)
+	client := resty.New()
+
+	client.
+		SetRetryCount(1).
+		SetRetryWaitTime(10 * time.Second).
+		SetRetryMaxWaitTime(90 * time.Second)
+
+	err, response := setHeader(localConst.ClientEndpoint+localConst.Port, data, client.GetClient())
 	defer response.Body.Close()
 	readDataFromResponse(err, response)
 	getMetrics(metrics, localConst.ClientEndpoint+localConst.Port)
 }
 
 func getMetrics(metrics localMetrics.Metrics, endpoint string) {
-	go metrics.UpdateMetrics(2)
-	go metrics.PostMetrics(endpoint, 10)
+	metrics.UpdateMetrics(2)
+	metrics.PostMetrics(endpoint, 10)
 	for {
 		time.Sleep(time.Second)
 	}
