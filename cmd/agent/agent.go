@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 )
@@ -34,7 +35,7 @@ func main() {
 	//}
 	client := &http.Client{}
 	var body = []byte(`{"message":"Hello"}`)
-	request, err := http.NewRequest(http.MethodPost, "http://localhost:8080/", bytes.NewBuffer(body))
+	request, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:8080/", bytes.NewBuffer(body))
 	if err != nil {
 		errors.New("HTTP Status != 200")
 	}
@@ -49,4 +50,11 @@ func main() {
 	}
 	defer response.Body.Close()
 
+	_body, _err := io.ReadAll(response.Body)
+	if _err != nil {
+		fmt.Println(_err)
+		os.Exit(1)
+	}
+	// и печатаем его
+	fmt.Println(string(_body))
 }
