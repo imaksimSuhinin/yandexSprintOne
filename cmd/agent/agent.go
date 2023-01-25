@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -17,6 +18,24 @@ import (
 
 func main() {
 	StartClient()
+
+	tickerStatisticsRefresh := time.NewTicker(2 * time.Second)
+	tickerStatisticsUpload := time.NewTicker(10 * time.Second)
+	var metrics = localMetrics.Metrics{}
+	select {
+	case timeTickerRefresh := <-tickerStatisticsRefresh.C:
+		log.Println("Refresh")
+		log.Println(timeTickerRefresh)
+		updateMetrics(metrics)
+
+	case timeTickerUpload := <-tickerStatisticsUpload.C:
+		log.Println(timeTickerUpload)
+
+		getMetrics(metrics, localConst.ClientEndpoint+localConst.Port)
+		log.Println("Upload")
+
+	}
+
 }
 
 func StartClient() {
@@ -36,12 +55,12 @@ func StartClient() {
 	defer response.Body.Close()
 }
 
+func updateMetrics(metrics localMetrics.Metrics) {
+	metrics.UpdateMetrics(1)
+
+}
 func getMetrics(metrics localMetrics.Metrics, endpoint string) {
-	metrics.UpdateMetrics(2)
-	metrics.PostMetrics(endpoint, 10)
-	for {
-		time.Sleep(time.Second)
-	}
+	metrics.PostMetrics(endpoint, 1)
 }
 
 func setHeader(endpoint string, data url.Values, client *http.Client) (error, *http.Response) {
