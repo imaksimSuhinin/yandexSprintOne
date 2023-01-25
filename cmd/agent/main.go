@@ -1,64 +1,36 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
-	"fmt"
-	"io"
-	"net/http"
-	"net/url"
-	"os"
+	"errors"
+	"github.com/go-resty/resty/v2"
 	"strconv"
-	"strings"
+	"time"
 )
 
 func main() {
 
-	endpoint := "http://localhost:8080"
+	client := resty.New()
 
-	data := url.Values{}
+	client.
+		SetRetryCount(3).
+		SetRetryWaitTime(10 * time.Second)
 
-	fmt.Println("Введите длинный URL")
+	resp, err := client.R().
+		SetPathParams(map[string]string{
+			"host":  "127.0.0.1",
+			"port":  strconv.Itoa(8080),
+			"type":  "type",
+			"name":  "name",
+			"value": "value",
+		}).
+		SetHeader("Content-Type", "text/plain").
+		Post("http://{host}:{port}/update/{type}/{name}/{value}")
 
-	reader := bufio.NewReader(os.Stdin)
-
-	long, err := reader.ReadString('\n')
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+
 	}
-	long = strings.TrimSuffix(long, "\n")
-
-	data.Set("url", long)
-
-	client := &http.Client{}
-	// конструируем запрос
-	// запрос методом POST должен, кроме заголовков, содержать тело
-	// тело должно быть источником потокового чтения io.Reader
-	// в большинстве случаев отлично подходит bytes.Buffer
-	request, err := http.NewRequest(http.MethodPost, endpoint, bytes.NewBufferString(data.Encode()))
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	// в заголовках запроса сообщаем, что данные кодированы стандартной URL-схемой
-	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	request.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
-	// отправляем запрос и получаем ответ
-	response, err := client.Do(request)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	// печатаем код ответа
-	fmt.Println("Статус-код ", response.Status)
-	defer response.Body.Close()
-	// читаем поток из тела ответа
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	if resp.StatusCode() != 200 {
+		errors.New("HTTP Status != 200")
 	}
 
-	fmt.Println(string(body))
 }
