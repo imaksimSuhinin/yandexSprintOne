@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
 	"html/template"
@@ -65,11 +64,11 @@ func ShowMetrics(w http.ResponseWriter, r *http.Request) {
 }
 
 func ShowValue(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	x, err := metricMap[vars["metricType"]]
-	if !err {
-		errors.New("Значение по ключу не найдено")
-	}
+	//vars := mux.Vars(r)
+	//x, err := metricMap[vars["metricType"]]
+	//if !err {
+	//	errors.New("Значение по ключу не найдено")
+	//}
 	w.WriteHeader(http.StatusOK)
 	//dst := []byte{0, 0, 0, 0, 0, 0, 0, 0}
 	//copy(dst[:], x.val[0:8])
