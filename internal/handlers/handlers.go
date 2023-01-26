@@ -92,7 +92,13 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte(err.Error()))
 			return
 		}
+
 		lastCounterData = lastCounterData + c // Change naming...
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
 		m.val = converter.Int64ToBytes(lastCounterData)
 		m.isCounter = true
 		metricMap[vars["metricName"]] = m
