@@ -76,7 +76,9 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 	case "gauge":
 		f, err := strconv.ParseFloat(vars["metricValue"], 64)
 		if err != nil {
-			log.Fatal(err)
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
 		}
 		m.val = converter.Float64ToBytes(f)
 		m.isCounter = false
@@ -86,7 +88,9 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 	case "counter":
 		c, err := strconv.ParseInt(vars["metricValue"], 10, 64)
 		if err != nil {
-			log.Fatal(err)
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
 		}
 		lastCounterData = lastCounterData + c // Change naming...
 		m.val = converter.Int64ToBytes(lastCounterData)

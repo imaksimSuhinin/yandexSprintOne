@@ -131,6 +131,7 @@ func (mertics *Metrics) PostMetrics(httpClient *resty.Client) {
 			Post("http://{host}:{port}/update/{metricType}/{metricName}/{metricValue}")
 
 		if err != nil {
+
 		}
 		if resp.StatusCode() != 200 {
 			errors.New("HTTP Status != 200")
