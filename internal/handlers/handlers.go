@@ -101,7 +101,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 	default:
 		log.Println("Type", vars["metricType"], "wrong")
 		outputMessage := "Type " + vars["metricType"] + " not supported, only [counter/gauge]"
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusNotImplemented)
 		w.Write([]byte(outputMessage))
 		r.Body.Close()
 	}
