@@ -4,9 +4,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	"yandexSprintOne/internal/converter"
 	"yandexSprintOne/internal/handlers"
-	agent "yandexSprintOne/internal/metrics"
 )
 
 func main() {
@@ -21,17 +19,11 @@ func main() {
 }
 
 func ShowValue(w http.ResponseWriter, r *http.Request) {
-	//vars := mux.Vars(r)
-	//x, err := vars["metricType"]
-	//if !err {
-	//	errors.New("Значение по ключу не найдено")
-	//}
-	w.WriteHeader(http.StatusOK)
-	var m *agent.Metrics
+	vars := mux.Vars(r)
+	//var m *agent.Metrics
+	x := vars["metricName"]
 
-	dst := []byte{0, 0, 0, 0, 0, 0, 0, 0}
-	i := converter.Int64ToBytes(int64(m.PollCount))
-	copy(dst[:], i[:])
-	w.Write(dst)
-	log.Println(dst)
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(x))
+	//w.Write([]byte("Unknown statName"))
 }

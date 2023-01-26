@@ -48,13 +48,32 @@ type Metrics struct {
 	RandomValue gauge
 
 	PollCount count
+
+	Data map[string]string
+}
+
+func NeWData() *Metrics {
+	return &Metrics{
+		Data: make(map[string]string),
+	}
+}
+func (m Metrics) SetData(key, value string) {
+	m.Data[key] = value
+}
+
+func (m *Metrics) GetData(key string) string {
+	value, err := m.Data[key]
+	if !err {
+		errors.New("Значение по ключу не найдено, ключ: " + key)
+	}
+	return value
 }
 
 var PollCount = 0
 
 func (m *Metrics) UpdateMetrics() *Metrics {
 	var rtm runtime.MemStats
-
+	dataSet := NeWData()
 	PollCount++
 	m.PollCount = count(PollCount)
 	rand.Seed(time.Now().Unix())
@@ -76,6 +95,8 @@ func (m *Metrics) UpdateMetrics() *Metrics {
 	m.NumGC = gauge(rtm.NumGC)
 
 	m.PollCount = count(PollCount)
+
+	dataSet.SetData(string(m.PollCount), string(count(PollCount)))
 	rand.Seed(time.Now().Unix())
 	m.RandomValue = gauge(rand.Intn(10000) + 1)
 	log.Println("refresh...")
