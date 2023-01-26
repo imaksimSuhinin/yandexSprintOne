@@ -67,15 +67,16 @@ type Metrics struct {
 	PollCount count
 }
 
+var PollCount = 0
+
 func (m *Metrics) UpdateMetrics() *Metrics {
 	var rtm runtime.MemStats
 
-	var PollCount = 0
+	PollCount++
 	m.PollCount = count(PollCount)
 	rand.Seed(time.Now().Unix())
 	m.RandomValue = gauge(rand.Intn(100) + 1)
 
-	PollCount++
 	runtime.ReadMemStats(&rtm)
 
 	m.NumGoroutine = gauge(runtime.NumGoroutine())
