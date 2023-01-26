@@ -78,7 +78,7 @@ func main() {
 			"value": "value",
 		}).
 		SetHeader("Content-Type", "text/plain").
-		Get("/")
+		Get("http://{host}:{port}/")
 	if resp.StatusCode() != 200 {
 		errors.New("HTTP Status != 200")
 	}
