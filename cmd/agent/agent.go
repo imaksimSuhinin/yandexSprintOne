@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-resty/resty/v2"
+	"log"
 	"math/rand"
 	"runtime"
 	"strconv"
@@ -15,14 +16,16 @@ func main() {
 	client := resty.New()
 	var m Metrics
 
-	refresh := time.NewTicker(2 * time.Second)
-	upload := time.NewTicker(10 * time.Second)
+	refresh := time.NewTicker(1 * time.Second)
+	upload := time.NewTicker(2 * time.Second)
 
-	_ = <-refresh.C
-	m.UpdateMetrics()
+	for true {
+		_ = <-refresh.C
+		var z = m.UpdateMetrics()
 
-	_ = <-upload.C
-	m.PostMetrics(client)
+		_ = <-upload.C
+		z.PostMetrics(client)
+	}
 
 }
 
@@ -91,13 +94,13 @@ func (m *Metrics) UpdateMetrics() *Metrics {
 	m.PollCount = count(PollCount)
 	rand.Seed(time.Now().Unix())
 	m.RandomValue = gauge(rand.Intn(10000) + 1)
+	log.Println("refresh...")
 	return m
-
 }
 
 func (mertics *Metrics) PostMetrics(httpClient *resty.Client) {
 
-	b, _ := json.Marshal(mertics)
+	b, _ := json.Marshal(&mertics)
 	var inInterface map[string]float64
 	json.Unmarshal(b, &inInterface)
 
@@ -125,10 +128,12 @@ func (mertics *Metrics) PostMetrics(httpClient *resty.Client) {
 			}).
 			SetHeader("Content-Type", "text/plain").
 			Post("http://{host}:{port}/update/{metricType}/{metricName}/{metricValue}")
+
 		if err != nil {
 		}
 		if resp.StatusCode() != 200 {
 			errors.New("HTTP Status != 200")
 		}
 	}
+	log.Println("Post...")
 }

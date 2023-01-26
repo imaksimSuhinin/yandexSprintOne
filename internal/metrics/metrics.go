@@ -84,7 +84,7 @@ func (mertics *Metrics) PostMetrics(httpClient *resty.Client, duration int) {
 		SetRetryCount(3).
 		SetRetryWaitTime(10 * time.Second)
 
-	b, _ := json.Marshal(mertics)
+	b, _ := json.Marshal(&mertics)
 	var inInterface map[string]float64
 	json.Unmarshal(b, &inInterface)
 
@@ -114,4 +114,3 @@ func (mertics *Metrics) PostMetrics(httpClient *resty.Client, duration int) {
 		fmt.Println(uri)
 	}
 }
-
