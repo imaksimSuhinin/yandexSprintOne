@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
-	"os"
+	"errors"
+	"github.com/go-resty/resty/v2"
+	"strconv"
 )
 
 func main() {
@@ -56,15 +56,30 @@ func main() {
 	//// и печатаем его
 	//fmt.Println(string(_body))
 
-	client := http.Client{}
+	//client := http.Client{}
+	//
+	//req, _ := http.NewRequest("POST", "http://127.0.0.1:8080/{type}/{name}/{value}", nil)
+	//
+	//req.Header.Add("Content-Type", "text/plain")
+	//_, err := client.Do(req)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	os.Exit(1)
+	//}
 
-	req, _ := http.NewRequest("POST", "http://127.0.0.1:8080/{type}/{name}/{value}", nil)
+	client := resty.New()
 
-	req.Header.Add("Content-Type", "text/plain")
-	_, err := client.Do(req)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	resp, _ := client.R().
+		SetPathParams(map[string]string{
+			"host":  "127.0.0.1",
+			"port":  strconv.Itoa(8080),
+			"type":  "type",
+			"name":  "name",
+			"value": "value",
+		}).
+		SetHeader("Content-Type", "text/plain").
+		Get("/")
+	if resp.StatusCode() != 200 {
+		errors.New("HTTP Status != 200")
 	}
-
 }
