@@ -97,6 +97,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 		m.isCounter = true
 		metricMap[vars["metricName"]] = m
 		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Ok"))
 		r.Body.Close()
 	default:
 		log.Println("Type", vars["metricType"], "wrong")
