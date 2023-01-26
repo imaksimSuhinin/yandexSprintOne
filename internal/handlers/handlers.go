@@ -71,11 +71,11 @@ func ShowValue(w http.ResponseWriter, r *http.Request) {
 		errors.New("Значение по ключу не найдено")
 	}
 	w.WriteHeader(http.StatusOK)
-	dst := []byte{}
+	dst := []byte{0, 0, 0, 0, 0, 0, 0, 0}
 	copy(dst[:], x.val[0:8])
-	myString := string(dst[:])
+	myString := string(vars["metricValue"])
 	w.Write([]byte(myString))
-
+	log.Println(myString)
 }
 
 func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
