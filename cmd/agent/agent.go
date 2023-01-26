@@ -15,13 +15,13 @@ func main() {
 	client := resty.New()
 	var m Metrics
 
-	tickerStatisticsRefresh := time.NewTicker(2 * time.Second)
-	tickerStatisticsUpload := time.NewTicker(10 * time.Second)
+	refresh := time.NewTicker(2 * time.Second)
+	upload := time.NewTicker(10 * time.Second)
 
-	_ = <-tickerStatisticsRefresh.C
+	_ = <-refresh.C
 	m.UpdateMetrics()
 
-	_ = <-tickerStatisticsUpload.C
+	_ = <-upload.C
 	m.PostMetrics(client)
 
 }
@@ -102,12 +102,13 @@ func (mertics *Metrics) PostMetrics(httpClient *resty.Client) {
 	json.Unmarshal(b, &inInterface)
 
 	for field, val := range inInterface {
-		var uri string
+		var uri, mtype, mval string
 		if field != "PollCount" {
-			uri = "update/gauge/" + field + "/" + strconv.FormatFloat(val, 'f', -1, 64)
-
+			mtype = "gauge"
+			mval = strconv.FormatFloat(val, 'f', -1, 64)
 		} else {
-			uri = "update/counter/" + field + "/" + strconv.FormatFloat(val, 'f', -1, 64)
+			mtype = "gauge"
+			mval = strconv.FormatFloat(val, 'f', -1, 64)
 		}
 
 		fmt.Println(uri)
@@ -118,9 +119,9 @@ func (mertics *Metrics) PostMetrics(httpClient *resty.Client) {
 			SetPathParams(map[string]string{
 				"host":        "127.0.0.1",
 				"port":        strconv.Itoa(8080),
-				"metricType":  "gauge",
+				"metricType":  mtype,
 				"metricName":  field,
-				"metricValue": strconv.FormatFloat(val, 'f', -1, 64),
+				"metricValue": mval,
 			}).
 			SetHeader("Content-Type", "text/plain").
 			Post("http://{host}:{port}/update/{metricType}/{metricName}/{metricValue}")
@@ -131,4 +132,3 @@ func (mertics *Metrics) PostMetrics(httpClient *resty.Client) {
 		}
 	}
 }
-
