@@ -49,36 +49,34 @@ type Metrics struct {
 	PollCount count
 }
 
-func (m *Metrics) UpdateMetrics(duration int) {
+func (m *Metrics) UpdateMetrics(duration int) *Metrics {
 	var rtm runtime.MemStats
-	var interval = time.Duration(duration) * time.Second
 	var PollCount = 0
 	m.PollCount = count(PollCount)
 	rand.Seed(time.Now().Unix())
 	m.RandomValue = gauge(rand.Intn(100) + 1)
-	for {
-		<-time.After(interval)
-		PollCount++
-		runtime.ReadMemStats(&rtm)
 
-		m.NumGoroutine = gauge(runtime.NumGoroutine())
+	PollCount++
+	runtime.ReadMemStats(&rtm)
 
-		m.Alloc = gauge(rtm.Alloc)
-		m.TotalAlloc = gauge(rtm.TotalAlloc)
-		m.Sys = gauge(rtm.Sys)
-		m.Mallocs = gauge(rtm.Mallocs)
-		m.Frees = gauge(rtm.Frees)
+	m.NumGoroutine = gauge(runtime.NumGoroutine())
 
-		m.LiveObjects = m.Mallocs - m.Frees
+	m.Alloc = gauge(rtm.Alloc)
+	m.TotalAlloc = gauge(rtm.TotalAlloc)
+	m.Sys = gauge(rtm.Sys)
+	m.Mallocs = gauge(rtm.Mallocs)
+	m.Frees = gauge(rtm.Frees)
 
-		m.PauseTotalNs = gauge(rtm.PauseTotalNs)
-		m.NumGC = gauge(rtm.NumGC)
+	m.LiveObjects = m.Mallocs - m.Frees
 
-		m.PollCount = count(PollCount)
-		rand.Seed(time.Now().Unix())
-		m.RandomValue = gauge(rand.Intn(10000) + 1)
+	m.PauseTotalNs = gauge(rtm.PauseTotalNs)
+	m.NumGC = gauge(rtm.NumGC)
 
-	}
+	m.PollCount = count(PollCount)
+	rand.Seed(time.Now().Unix())
+	m.RandomValue = gauge(rand.Intn(10000) + 1)
+
+	return m
 }
 
 func (mertics *Metrics) PostMetrics(httpClient *resty.Client, duration int) {
@@ -86,37 +84,34 @@ func (mertics *Metrics) PostMetrics(httpClient *resty.Client, duration int) {
 		SetRetryCount(3).
 		SetRetryWaitTime(10 * time.Second)
 
-	var interval = time.Duration(duration) * time.Second
-	for {
-		<-time.After(interval)
-		b, _ := json.Marshal(mertics)
-		var inInterface map[string]float64
-		json.Unmarshal(b, &inInterface)
+	b, _ := json.Marshal(mertics)
+	var inInterface map[string]float64
+	json.Unmarshal(b, &inInterface)
 
-		for field, val := range inInterface {
-			var uri string
-			if field != "PollCount" {
-				uri = "update/gauge/" + field + "/" + strconv.FormatFloat(val, 'f', -1, 64)
+	for field, val := range inInterface {
+		var uri string
+		if field != "PollCount" {
+			uri = "update/gauge/" + field + "/" + strconv.FormatFloat(val, 'f', -1, 64)
 
-			} else {
-				uri = "update/counter/" + field + "/" + strconv.FormatFloat(val, 'f', -1, 64)
-			}
-			resp, err := httpClient.R().
-				SetPathParams(map[string]string{
-					"host":  "127.0.0.1",
-					"port":  strconv.Itoa(8080),
-					"type":  "gauge",
-					"name":  field,
-					"value": strconv.FormatFloat(val, 'f', -1, 64),
-				}).
-				SetHeader("Content-Type", "text/plain").
-				Post("http://{host}:{port}/update/{type}/{name}/{value}")
-			if err != nil {
-			}
-			if resp.StatusCode() != 200 {
-				errors.New("HTTP Status != 200")
-			}
-			fmt.Println(uri)
+		} else {
+			uri = "update/counter/" + field + "/" + strconv.FormatFloat(val, 'f', -1, 64)
 		}
+		resp, err := httpClient.R().
+			SetPathParams(map[string]string{
+				"host":  "127.0.0.1",
+				"port":  strconv.Itoa(8080),
+				"type":  "gauge",
+				"name":  field,
+				"value": strconv.FormatFloat(val, 'f', -1, 64),
+			}).
+			SetHeader("Content-Type", "text/plain").
+			Post("http://{host}:{port}/update/{type}/{name}/{value}")
+		if err != nil {
+		}
+		if resp.StatusCode() != 200 {
+			errors.New("HTTP Status != 200")
+		}
+		fmt.Println(uri)
 	}
 }
+
