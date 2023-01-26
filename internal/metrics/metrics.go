@@ -105,12 +105,12 @@ func (mertics *Metrics) PostMetrics(httpClient *resty.Client, duration int) {
 				SetPathParams(map[string]string{
 					"host":  "127.0.0.1",
 					"port":  strconv.Itoa(8080),
-					"type":  "update",
+					"type":  "gauge",
 					"name":  field,
 					"value": strconv.FormatFloat(val, 'f', -1, 64),
 				}).
 				SetHeader("Content-Type", "text/plain").
-				Post("http://{host}:{port}/{type}/{name}/{value}")
+				Post("http://{host}:{port}/update/{type}/{name}/{value}")
 			if err != nil {
 			}
 			if resp.StatusCode() != 200 {
