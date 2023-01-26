@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"net/http"
-	"os"
-	"time"
+	"github.com/go-resty/resty/v2"
 )
 
 func main() {
@@ -57,16 +55,33 @@ func main() {
 	//// и печатаем его
 	//fmt.Println(string(_body))
 
-	client := http.Client{
-		Timeout: 6 * time.Second,
-	}
+	//client := http.Client{
+	//	Timeout: 6 * time.Second,
+	//}
+	//
+	//req, _ := http.NewRequest("POST", "http://127.0.0.1:8080/", nil)
+	//
+	//req.Header.Add("Content-Type", "text/plain")
+	//_, err := client.Do(req)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	os.Exit(1)
+	//}
 
-	req, _ := http.NewRequest("POST", "http://127.0.0.1:8080/", nil)
+	client := resty.New()
 
-	req.Header.Add("Content-Type", "text/plain")
-	_, err := client.Do(req)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	resp, err := client.R().
+		EnableTrace().
+		Get("http://127.0.0.1:8080")
+
+	// Explore response object
+	fmt.Println("Response Info:")
+	fmt.Println("  Error      :", err)
+	fmt.Println("  Status Code:", resp.StatusCode())
+	fmt.Println("  Status     :", resp.Status())
+	fmt.Println("  Proto      :", resp.Proto())
+	fmt.Println("  Time       :", resp.Time())
+	fmt.Println("  Received At:", resp.ReceivedAt())
+	fmt.Println("  Body       :\n", resp)
+	fmt.Println()
 }
