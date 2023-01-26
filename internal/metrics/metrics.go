@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-resty/resty/v2"
+	"log"
 	"math/rand"
 	"runtime"
 	"strconv"
@@ -49,14 +50,16 @@ type Metrics struct {
 	PollCount count
 }
 
-func (m *Metrics) UpdateMetrics(duration int) *Metrics {
+var PollCount = 0
+
+func (m *Metrics) UpdateMetrics() *Metrics {
 	var rtm runtime.MemStats
-	var PollCount = 0
+
+	PollCount++
 	m.PollCount = count(PollCount)
 	rand.Seed(time.Now().Unix())
 	m.RandomValue = gauge(rand.Intn(100) + 1)
 
-	PollCount++
 	runtime.ReadMemStats(&rtm)
 
 	m.NumGoroutine = gauge(runtime.NumGoroutine())
@@ -75,42 +78,47 @@ func (m *Metrics) UpdateMetrics(duration int) *Metrics {
 	m.PollCount = count(PollCount)
 	rand.Seed(time.Now().Unix())
 	m.RandomValue = gauge(rand.Intn(10000) + 1)
-
+	log.Println("refresh...")
 	return m
 }
 
-func (mertics *Metrics) PostMetrics(httpClient *resty.Client, duration int) {
-	httpClient.
-		SetRetryCount(3).
-		SetRetryWaitTime(10 * time.Second)
+func (mertics *Metrics) PostMetrics(httpClient *resty.Client) {
 
 	b, _ := json.Marshal(&mertics)
 	var inInterface map[string]float64
 	json.Unmarshal(b, &inInterface)
 
 	for field, val := range inInterface {
-		var uri string
+		var uri, mtype, mval string
 		if field != "PollCount" {
-			uri = "update/gauge/" + field + "/" + strconv.FormatFloat(val, 'f', -1, 64)
-
+			mtype = "gauge"
+			mval = strconv.FormatFloat(val, 'f', -1, 64)
 		} else {
-			uri = "update/counter/" + field + "/" + strconv.FormatFloat(val, 'f', -1, 64)
+			mtype = "gauge"
+			mval = strconv.FormatFloat(val, 'f', -1, 64)
 		}
+
+		fmt.Println(uri)
+		httpClient.
+			SetRetryCount(3).
+			SetRetryWaitTime(10 * time.Second)
 		resp, err := httpClient.R().
 			SetPathParams(map[string]string{
-				"host":  "127.0.0.1",
-				"port":  strconv.Itoa(8080),
-				"type":  "gauge",
-				"name":  field,
-				"value": strconv.FormatFloat(val, 'f', -1, 64),
+				"host":        "127.0.0.1",
+				"port":        strconv.Itoa(8080),
+				"metricType":  mtype,
+				"metricName":  field,
+				"metricValue": mval,
 			}).
 			SetHeader("Content-Type", "text/plain").
-			Post("http://{host}:{port}/update/{type}/{name}/{value}")
+			Post("http://{host}:{port}/update/{metricType}/{metricName}/{metricValue}")
+
 		if err != nil {
+
 		}
 		if resp.StatusCode() != 200 {
 			errors.New("HTTP Status != 200")
 		}
-		fmt.Println(uri)
 	}
+	log.Println("Post...")
 }
