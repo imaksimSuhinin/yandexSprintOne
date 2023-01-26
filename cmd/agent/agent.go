@@ -91,9 +91,6 @@ func (m *Metrics) UpdateMetrics(duration int) {
 }
 
 func (mertics *Metrics) PostMetrics(httpClient *resty.Client, duration int) {
-	httpClient.
-		SetRetryCount(3).
-		SetRetryWaitTime(10 * time.Second)
 
 	var interval = time.Duration(duration) * time.Second
 	for {
@@ -110,6 +107,9 @@ func (mertics *Metrics) PostMetrics(httpClient *resty.Client, duration int) {
 			} else {
 				uri = "update/counter/" + field + "/" + strconv.FormatFloat(val, 'f', -1, 64)
 			}
+			httpClient.
+				SetRetryCount(3).
+				SetRetryWaitTime(10 * time.Second)
 			resp, err := httpClient.R().
 				SetPathParams(map[string]string{
 					"host":  "127.0.0.1",
