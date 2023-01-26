@@ -10,7 +10,7 @@ import (
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", handlers.ShowMetrics)
-	r.HandleFunc("/value/{metricType}/{metricName}", handlers.ShowMetrics)
+	r.HandleFunc("/value/{metricType}/{metricName}", handlers.ShowValue)
 	r.HandleFunc("/update/{metricType}/{metricName}/{metricValue}", handlers.PostMetricHandler)
 	err := http.ListenAndServe(":8080", r)
 	if err != nil {

@@ -42,17 +42,17 @@ func SaveMetricToFile(m map[string]metricValue) {
 
 func ShowMetrics(w http.ResponseWriter, r *http.Request) {
 	var stringMetricMap metric
+	vars := mux.Vars(r)
 	metricStringMap := make(map[string]metric)
 	for k, v := range metricMap {
 		if !v.isCounter {
 			stringMetricMap.mtype = "gauge"
-			stringMetricMap.value = strconv.FormatFloat((converter.Float64FromBytes([]byte(v.val[:]))), 'f', -1, 64)
+			stringMetricMap.value = vars["metricValue"]
 			metricStringMap[k] = stringMetricMap
 		} else {
 			stringMetricMap.mtype = "counter"
-			vars := mux.Vars(r)
+
 			stringMetricMap.value = vars["metricValue"]
-			//stringMetricMap.value = strconv.FormatInt((converter.Int64FromBytes([]byte(v.val[:]))), 10)
 			metricStringMap[k] = stringMetricMap
 		}
 
@@ -61,6 +61,13 @@ func ShowMetrics(w http.ResponseWriter, r *http.Request) {
 	Templ, _ := template.ParseFiles("internal/html/index.html")
 	w.WriteHeader(http.StatusOK)
 	Templ.Execute(w, metricMap)
+}
+
+func ShowValue(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	x := vars["metricValue"]
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(x))
 }
 
 func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
