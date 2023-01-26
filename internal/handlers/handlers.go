@@ -40,7 +40,7 @@ func SaveMetricToFile(m map[string]metricValue) {
 	}
 }
 
-func ShowMetrics(w http.ResponseWriter, _ *http.Request) {
+func ShowMetrics(w http.ResponseWriter, r *http.Request) {
 	var stringMetricMap metric
 	metricStringMap := make(map[string]metric)
 	for k, v := range metricMap {
@@ -50,7 +50,9 @@ func ShowMetrics(w http.ResponseWriter, _ *http.Request) {
 			metricStringMap[k] = stringMetricMap
 		} else {
 			stringMetricMap.mtype = "counter"
-			stringMetricMap.value = strconv.FormatInt((converter.Int64FromBytes([]byte(v.val[:]))), 10)
+			vars := mux.Vars(r)
+			stringMetricMap.value = vars["metricValue"]
+			//stringMetricMap.value = strconv.FormatInt((converter.Int64FromBytes([]byte(v.val[:]))), 10)
 			metricStringMap[k] = stringMetricMap
 		}
 
