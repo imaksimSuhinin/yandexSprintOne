@@ -9,6 +9,6 @@ func main() {
 	client := resty.New()
 	var metrics runtime_loc.Metrics
 	metrics.UpdateMetrics(2)
-	metrics.PostMetrics(client, 10)
+	metrics.PostMetrics(client, 4)
 
 }
