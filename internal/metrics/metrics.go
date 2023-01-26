@@ -2,7 +2,9 @@ package runtime_loc
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/go-resty/resty/v2"
 	"math/rand"
 	"runtime"
 	"strconv"
@@ -79,7 +81,7 @@ func (m *Metrics) UpdateMetrics(duration int) {
 	}
 }
 
-func (mertics *Metrics) PostMetrics(serverAddr string, duration int) {
+func (mertics *Metrics) PostMetrics(httpClient *resty.Client, duration int) {
 
 	var interval = time.Duration(duration) * time.Second
 	for {
@@ -96,13 +98,25 @@ func (mertics *Metrics) PostMetrics(serverAddr string, duration int) {
 			} else {
 				uri = "update/counter/" + field + "/" + strconv.FormatFloat(val, 'f', -1, 64)
 			}
-			//request, err := http.Post(serverAddr+uri, "text/plain", bytes.NewReader([]byte(strconv.FormatFloat(val, 'f', -1, 64))))
-			//
-			//if err != nil {
-			//	log.Fatal(err)
-			//}
-			//request.Body.Close()
+			httpClient.
+				SetRetryCount(3).
+				SetRetryWaitTime(10 * time.Second)
 
+			resp, err := httpClient.R().
+				SetPathParams(map[string]string{
+					"host":  "127.0.0.1",
+					"port":  strconv.Itoa(8080),
+					"type":  "type",
+					"name":  "name",
+					"value": "value",
+				}).
+				SetHeader("Content-Type", "text/plain").
+				Post("http://{host}:{port}/")
+			if err != nil {
+			}
+			if resp.StatusCode() != 200 {
+				errors.New("HTTP Status != 200")
+			}
 			fmt.Println(uri)
 		}
 	}
