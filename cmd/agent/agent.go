@@ -107,25 +107,26 @@ func (mertics *Metrics) PostMetrics(httpClient *resty.Client, duration int) {
 			} else {
 				uri = "update/counter/" + field + "/" + strconv.FormatFloat(val, 'f', -1, 64)
 			}
+
+			fmt.Println(uri)
 			httpClient.
 				SetRetryCount(3).
 				SetRetryWaitTime(10 * time.Second)
 			resp, err := httpClient.R().
 				SetPathParams(map[string]string{
-					"host":  "127.0.0.1",
-					"port":  strconv.Itoa(8080),
-					"type":  "gauge",
-					"name":  field,
-					"value": strconv.FormatFloat(val, 'f', -1, 64),
+					"host":        "127.0.0.1",
+					"port":        strconv.Itoa(8080),
+					"metricType":  "gauge",
+					"metricName":  field,
+					"metricValue": strconv.FormatFloat(val, 'f', -1, 64),
 				}).
 				SetHeader("Content-Type", "text/plain").
-				Post("http://{host}:{port}/update/{type}/{name}/{value}")
+				Post("http://{host}:{port}/update/{metricType}/{metricName}/{metricValue}")
 			if err != nil {
 			}
 			if resp.StatusCode() != 200 {
 				errors.New("HTTP Status != 200")
 			}
-			fmt.Println(uri)
 		}
 	}
 }
