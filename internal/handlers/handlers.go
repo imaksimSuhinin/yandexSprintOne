@@ -34,7 +34,7 @@ func ShowMetrics(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 			metricStringMap[k] = stringMetricMap
 		} else {
 			stringMetricMap.mtype = "counter"
-			base.UpdateCounterValue("PollCount", string(345))
+			base.UpdateCounterValue("PollCount", vars["metricValue"])
 			stringMetricMap.value = vars["metricValue"]
 			metricStringMap[k] = stringMetricMap
 		}
