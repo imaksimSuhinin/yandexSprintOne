@@ -1,4 +1,4 @@
-package runtime_loc
+package metrics
 
 import (
 	"encoding/json"
@@ -75,7 +75,7 @@ func (m *Metrics) UpdateMetrics() *Metrics {
 	return m
 }
 
-func (mertics *Metrics) PostMetrics(httpClient *resty.Client) {
+func (mertics *Metrics) PostMetrics(httpClient *resty.Client) error {
 	b, _ := json.Marshal(&mertics)
 	var inInterface map[string]float64
 	json.Unmarshal(b, &inInterface)
@@ -106,11 +106,12 @@ func (mertics *Metrics) PostMetrics(httpClient *resty.Client) {
 			Post("http://{host}:{port}/update/{metricType}/{metricName}/{metricValue}")
 
 		if err != nil {
-
+			return err
 		}
 		if resp.StatusCode() != 200 {
-			errors.New("HTTP Status != 200")
+			return errors.New("HTTP Status != 200")
 		}
 	}
 	log.Println("Post...")
+	return nil
 }

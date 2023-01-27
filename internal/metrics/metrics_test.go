@@ -1,4 +1,4 @@
-package runtime_loc
+package metrics
 
 import (
 	"testing"
