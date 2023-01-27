@@ -40,7 +40,7 @@ func ShowMetrics(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-	log.Println(stringMetricMap.value)
+	//log.Println(stringMetricMap.value)
 	Templ, _ := template.ParseFiles("internal/html/index.html")
 	w.WriteHeader(http.StatusOK)
 	Templ.Execute(w, metricMap)
@@ -57,6 +57,8 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 	}
 	var m metricValue
 	vars := mux.Vars(r)
+	log.Println(vars["metricType"] + "//////" + vars["metricName"] + "/////////////////" + vars["metricValue"])
+
 	switch vars["metricType"] {
 	case "gauge":
 		f, err := strconv.ParseFloat(vars["metricValue"], 64)
@@ -93,6 +95,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Ok"))
+
 		err = base.UpdateCounterValue(vars["metricName"], vars["metricValue"])
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -108,7 +111,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 
 		r.Body.Close()
 	}
-	log.Println(metricMap)
+	//log.Println(metricMap)
 
 }
 
