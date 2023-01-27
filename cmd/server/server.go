@@ -18,11 +18,11 @@ func main() {
 	r.HandleFunc("/value/{metricType}/{metricName}",
 		func(writer http.ResponseWriter, request *http.Request) {
 			handlers.ShowValue(writer, request, &database)
-		})
+		}).Methods("Get")
 	r.HandleFunc("/update/{metricType}/{metricName}/{metricValue}",
 		func(writer http.ResponseWriter, request *http.Request) {
 			handlers.PostMetricHandler(writer, request, &database)
-		})
+		}).Methods("Post")
 	err := http.ListenAndServe(":8080", r)
 	if err != nil {
 		log.Fatal(err)
