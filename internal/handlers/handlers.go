@@ -125,7 +125,7 @@ func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(x))
-	case "counter":
+	case "count":
 		x, err := base.ReadValue(vars["metricName"])
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
