@@ -69,11 +69,11 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 		m.isCounter = false
 		metricMap[vars["metricName"]] = m
 		err = base.UpdateGaugeValue(vars["metricName"], f)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Server error"))
-			return
-		}
+		//if err != nil {
+		//	w.WriteHeader(http.StatusInternalServerError)
+		//	w.Write([]byte("Server error"))
+		//	return
+		//}
 		w.WriteHeader(http.StatusOK)
 		r.Body.Close()
 	case "counter":
@@ -82,18 +82,18 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
-		
+			return
 		}
 		lastCounterData = lastCounterData + c // Change naming...
 		m.val = converter.Int64ToBytes(lastCounterData)
 		m.isCounter = true
 		metricMap[vars["metricName"]] = m
 		err = base.UpdateCounterValue(vars["metricType"], vars["metricValue"])
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Server error"))
-
-		}
+		//if err != nil {
+		//	w.WriteHeader(http.StatusInternalServerError)
+		//	w.Write([]byte("Server error"))
+		//	return
+		//}
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Ok"))
 		r.Body.Close()
