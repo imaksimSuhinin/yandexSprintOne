@@ -133,9 +133,9 @@ func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 			w.Write([]byte("Unknown statName"))
 			return
 		}
-		name := vars["metricName"] + x
+		
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(name))
+		w.Write([]byte(x))
 		r.Body.Close()
 	default:
 		w.WriteHeader(http.StatusNotFound)
