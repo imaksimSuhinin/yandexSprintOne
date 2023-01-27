@@ -127,8 +127,7 @@ func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 		r.Body.Close()
 	case "counter":
 
-		//	x, err := base.ReadValue(vars["metricName"])
-		x, err := base.ReadValue(("PollCount"))
+		x, err := base.ReadValue(vars["metricName"])
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("Unknown statName"))
