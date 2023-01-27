@@ -133,7 +133,7 @@ func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 			w.Write([]byte("Unknown statName"))
 			return
 		}
-		
+
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(x))
 		r.Body.Close()
