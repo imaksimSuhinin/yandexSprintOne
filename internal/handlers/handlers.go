@@ -82,7 +82,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
-			return
+		
 		}
 		lastCounterData = lastCounterData + c // Change naming...
 		m.val = converter.Int64ToBytes(lastCounterData)
@@ -92,7 +92,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Server error"))
-			return
+
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Ok"))
