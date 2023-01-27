@@ -116,12 +116,20 @@ func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 	switch vars["metricType"] {
 	case "gauge":
 		name := vars["metricName"]
-		x := base.ReadValue(name)
+		x, err := base.ReadValue(name)
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("Unknown statName"))
+		}
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(x))
 		r.Body.Close()
 	case "counter":
-		x := base.ReadValue(("PollCount"))
+		x, err := base.ReadValue(("PollCount"))
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("Unknown statName"))
+		}
 		name := vars["metricName"] + x
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(name))

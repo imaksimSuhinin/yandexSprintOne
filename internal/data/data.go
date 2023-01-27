@@ -68,6 +68,7 @@ func (m DataBase) Write(key, value string) error {
 func (m DataBase) Read(key string) string {
 	value, err := m.data[key]
 	if !err {
+
 		return key
 	}
 	return value
@@ -93,6 +94,6 @@ func (m DataBase) UpdateCounterValue(key string, value string) error {
 	return nil
 }
 
-func (m DataBase) ReadValue(key string) string {
-	return m.Read(key)
+func (m DataBase) ReadValue(key string) (string, error) {
+	return m.Read(key), nil
 }
