@@ -34,7 +34,7 @@ func ShowMetrics(w http.ResponseWriter, r *http.Request) {
 			stringMetricMap.value = vars["metricValue"]
 			metricStringMap[k] = stringMetricMap
 		} else {
-			stringMetricMap.mtype = "counter"
+			stringMetricMap.mtype = "count"
 			stringMetricMap.value = vars["metricValue"]
 			metricStringMap[k] = stringMetricMap
 		}
@@ -77,7 +77,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 			return
 		}
 		r.Body.Close()
-	case "counter":
+	case "count":
 		c, err := strconv.ParseInt(vars["metricValue"], 10, 64)
 		if err != nil {
 
@@ -126,7 +126,7 @@ func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 		w.Write([]byte(x))
 		r.Body.Close()
 	case "counter":
-			
+
 		//	x, err := base.ReadValue(vars["metricName"])
 		x, err := base.ReadValue(("PollCount"))
 		if err != nil {
