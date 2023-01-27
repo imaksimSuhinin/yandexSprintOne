@@ -80,9 +80,12 @@ func (m DataBase) UpdateGaugeValue(key string, value float64) error {
 func (m DataBase) UpdateCounterValue(key string, value string) error {
 	prevVal := m.Read(key)
 	prevValInt, err := strconv.ParseInt(prevVal, 10, 64)
+	if err != nil {
+		return errors.New(" value is not int64")
+	}
 	lastValInt, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
-		return errors.New("MemStats value is not int64")
+		return errors.New(" value is not int64")
 	}
 	res := prevValInt + lastValInt
 	newValue := fmt.Sprintf("%v", res)

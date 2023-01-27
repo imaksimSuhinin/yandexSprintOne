@@ -75,8 +75,8 @@ func (m *Metrics) UpdateMetrics() *Metrics {
 	return m
 }
 
-func (mertics *Metrics) PostMetrics(httpClient *resty.Client) error {
-	b, _ := json.Marshal(&mertics)
+func (m *Metrics) PostMetrics(httpClient *resty.Client) error {
+	b, _ := json.Marshal(&m)
 	var inInterface map[string]float64
 	json.Unmarshal(b, &inInterface)
 
