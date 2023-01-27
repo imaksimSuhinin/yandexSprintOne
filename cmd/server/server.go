@@ -1,9 +1,12 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"strconv"
 	data "yandexSprintOne/internal/data"
 	"yandexSprintOne/internal/handlers"
 )
@@ -26,11 +29,20 @@ func main() {
 
 func ShowValue(w http.ResponseWriter, r *http.Request, m *data.DataBase) {
 	vars := mux.Vars(r)
-	m.Write("PollCount", vars["metricName"])
+
+	oldValueInt, err := strconv.ParseInt(m.Read("PollCount"), 10, 64)
+	if err != nil {
+		errors.New("MemStats value is not int64")
+	}
+	value, err := strconv.ParseInt(vars["metricName"], 10, 64)
+	newValue := fmt.Sprintf("%v", oldValueInt+value)
+	m.Write("PollCount", newValue)
+
+	//m.Write("PollCount", vars["metricName"])
 	var x = m.Read("PollCount")
 	//x := m.GetData("PollCount")
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(string(x)))
+	w.Write([]byte(x))
 	//w.Write([]byte("Unknown statName"))
 }
