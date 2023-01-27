@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"yandexSprintOne/internal/converter"
+	"yandexSprintOne/internal/data"
 )
 
 type metric struct {
@@ -22,7 +23,7 @@ var (
 	lastCounterData int64
 )
 
-func ShowMetrics(w http.ResponseWriter, r *http.Request) {
+func ShowMetrics(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 	var stringMetricMap metric
 	vars := mux.Vars(r)
 	metricStringMap := make(map[string]metric)
@@ -33,7 +34,7 @@ func ShowMetrics(w http.ResponseWriter, r *http.Request) {
 			metricStringMap[k] = stringMetricMap
 		} else {
 			stringMetricMap.mtype = "counter"
-
+			base.UpdateCounterValue("PollCount", string(345))
 			stringMetricMap.value = vars["metricValue"]
 			metricStringMap[k] = stringMetricMap
 		}
@@ -45,7 +46,7 @@ func ShowMetrics(w http.ResponseWriter, r *http.Request) {
 	Templ.Execute(w, metricMap)
 }
 
-func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
+func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 	reqMethod := r.Method
 	if reqMethod != "POST" {
 		outputMessage := "Only POST method is alload"
@@ -67,11 +68,13 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 		m.val = converter.Float64ToBytes(f)
 		m.isCounter = false
 		metricMap[vars["metricName"]] = m
+		base.UpdateGaugeValue(vars["metricName"], f)
 		w.WriteHeader(http.StatusOK)
 		r.Body.Close()
 	case "counter":
 		c, err := strconv.ParseInt(vars["metricValue"], 10, 64)
 		if err != nil {
+
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
 			return
@@ -80,6 +83,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 		m.val = converter.Int64ToBytes(lastCounterData)
 		m.isCounter = true
 		metricMap[vars["metricName"]] = m
+		base.UpdateCounterValue("PollCount", "string(567)")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Ok"))
 		r.Body.Close()

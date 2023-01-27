@@ -1,27 +1,23 @@
 package data
 
+import (
+	"errors"
+	"fmt"
+	"strconv"
+	"sync"
+)
+
 type DataBase struct {
 	data map[string]string
+	*sync.RWMutex
 }
 
-func NewDataBase() *DataBase {
-	return &DataBase{
-		data: make(map[string]string),
+func NewDataBase() DataBase {
+	return DataBase{
+		data:    make(map[string]string),
+		RWMutex: &sync.RWMutex{},
 	}
 }
-func (m DataBase) Write(key, value string) error {
-	m.data[key] = value
-	return nil
-}
-
-func (m DataBase) Read(key string) string {
-	value, err := m.data[key]
-	if !err {
-		return ""
-	}
-	return value
-}
-
 func InitDatabase() DataBase {
 	var metricData = NewDataBase()
 
@@ -60,5 +56,40 @@ func InitDatabase() DataBase {
 	metricData.Write("PollCount", "0")
 	metricData.Write("RandomValue", "0")
 
-	return *metricData
+	return metricData
+}
+func (m DataBase) Write(key, value string) error {
+	m.data[key] = value
+	return nil
+}
+
+func (m DataBase) Read(key string) string {
+	value, err := m.data[key]
+	if !err {
+		return ""
+	}
+	return value
+}
+func (memStatsStorage DataBase) UpdateGaugeValue(key string, value float64) error {
+	return memStatsStorage.Write(key, fmt.Sprintf("%v", value))
+}
+
+func (memStatsStorage DataBase) UpdateCounterValue(key string, value string) error {
+	//Чтение старого значения
+	oldValue := memStatsStorage.Read(key)
+
+	//Конвертация в число
+	_, err := strconv.ParseInt(oldValue, 10, 64)
+	if err != nil {
+		return errors.New("MemStats value is not int64")
+	}
+
+	newValue := fmt.Sprintf("%v", value+oldValue)
+	memStatsStorage.Write(key, newValue)
+
+	return nil
+}
+
+func (memStatsStorage DataBase) ReadValue(key string) string {
+	return memStatsStorage.Read(key)
 }

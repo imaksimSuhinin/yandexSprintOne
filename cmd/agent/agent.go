@@ -7,6 +7,7 @@ import (
 )
 
 func main() {
+
 	client := resty.New()
 	var m loc_metric.Metrics
 

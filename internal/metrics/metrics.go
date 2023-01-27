@@ -80,6 +80,7 @@ func (m *Metrics) UpdateMetrics() *Metrics {
 	rand.Seed(time.Now().Unix())
 	m.RandomValue = gauge(rand.Intn(10000) + 1)
 	log.Println("refresh...")
+
 	return m
 }
 
