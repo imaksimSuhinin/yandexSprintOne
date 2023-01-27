@@ -108,8 +108,8 @@ func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 		w.Write([]byte(x))
 		r.Body.Close()
 	case "counter":
-		//x := base.ReadValue(("PollCount"))
-		name := vars["metricName"]
+		x := base.ReadValue(("PollCount"))
+		name := vars["metricName"] + x
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(name))
 		r.Body.Close()

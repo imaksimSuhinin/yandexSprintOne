@@ -14,11 +14,12 @@ func main() {
 	refresh := time.NewTicker(1 * time.Second)
 	upload := time.NewTicker(2 * time.Second)
 
-	for true {
-		_ = <-refresh.C
+	for {
+		<-refresh.C
 		var z = m.UpdateMetrics()
 
-		_ = <-upload.C
+		<-upload.C
 		z.PostMetrics(client)
+
 	}
 }
