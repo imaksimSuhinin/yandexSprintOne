@@ -57,6 +57,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 	}
 	var m metricValue
 	vars := mux.Vars(r)
+	log.Println(vars["metricType"])
 	switch vars["metricType"] {
 	case "gauge":
 		f, err := strconv.ParseFloat(vars["metricValue"], 64)
@@ -80,7 +81,6 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 	case "count":
 		c, err := strconv.ParseInt(vars["metricValue"], 10, 64)
 		if err != nil {
-
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
 			return
@@ -100,12 +100,12 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 		}
 		r.Body.Close()
 	default:
-		log.Println("Type", vars["metricType"], "wrong")
-		outputMessage := "Type " + vars["metricType"] + " not supported, only [counter/gauge]"
-		w.WriteHeader(http.StatusNotImplemented)
-		w.Write([]byte(outputMessage))
-
-		r.Body.Close()
+		//log.Println("Type", vars["metricType"], "wrong")
+		//outputMessage := "Type " + vars["metricType"] + " not supported, only [counter/gauge]"
+		//w.WriteHeader(http.StatusNotImplemented)
+		//w.Write([]byte(outputMessage))
+		//
+		//r.Body.Close()
 	}
 	log.Println(metricMap)
 
