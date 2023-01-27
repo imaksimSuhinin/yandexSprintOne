@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/gorilla/mux"
 	"html/template"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"yandexSprintOne/internal/converter"
 )
@@ -23,22 +21,6 @@ var (
 	metricMap       = make(map[string]metricValue)
 	lastCounterData int64
 )
-
-func SaveMetricToFile(m map[string]metricValue) {
-	options := os.O_WRONLY | os.O_TRUNC | os.O_CREATE
-	file, err := os.OpenFile("metrics.txt", options, os.FileMode(0600))
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = fmt.Fprintln(file, m)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = file.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
-}
 
 func ShowMetrics(w http.ResponseWriter, r *http.Request) {
 	var stringMetricMap metric
@@ -109,5 +91,5 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 		r.Body.Close()
 	}
 	log.Println(metricMap)
-	SaveMetricToFile(metricMap)
+
 }
