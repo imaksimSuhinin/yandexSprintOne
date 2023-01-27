@@ -57,7 +57,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 	}
 	var m metricValue
 	vars := mux.Vars(r)
-	log.Println(vars["metricType"] + "//////" + vars["metricName"] + "/////////////////" + vars["metricValue"])
+	//log.Println(vars["metricType"] + "//////" + vars["metricName"] + "/////////////////" + vars["metricValue"])
 
 	switch vars["metricType"] {
 	case "gauge":
@@ -75,12 +75,14 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Server error"))
-			
+
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Ok"))
 		r.Body.Close()
-	case "counter":
+	case "count":
+		log.Println(vars["metricType"] + "//////" + vars["metricName"] + "/////////////////" + vars["metricValue"])
+
 		c, err := strconv.ParseInt(vars["metricValue"], 10, 64)
 		if err != nil {
 
