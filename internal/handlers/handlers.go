@@ -92,10 +92,12 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Ok"))
-		err = base.UpdateCounterValue("PollCount", vars["metricName"])
+
+		err = base.UpdateCounterValue(vars["metricName"], vars["metricValue"])
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Server error"))
+			log.Println("dsfsdfsdfsdfsdfsdfsdfsdfsd" + vars["metricName"])
 			return
 		}
 		r.Body.Close()
@@ -126,8 +128,8 @@ func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 		w.Write([]byte(x))
 		r.Body.Close()
 	case "counter":
-		log.Println("xxxxxxx" + vars["metricType"] + "////" + vars["metricName"] + "///////////////" + vars["metricValue"])
 		x, err := base.ReadValue(vars["metricName"])
+		log.Println("xxxxxxx" + vars["metricType"] + "////" + vars["metricName"] + "///////////////" + vars["metricValue"])
 
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
