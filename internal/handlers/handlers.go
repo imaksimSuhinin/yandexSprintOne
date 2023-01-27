@@ -57,7 +57,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 	}
 	var m metricValue
 	vars := mux.Vars(r)
-	log.Println(vars["metricType"])
+	//	log.Println(vars["metricType"])
 	switch vars["metricType"] {
 	case "gauge":
 		f, err := strconv.ParseFloat(vars["metricValue"], 64)
@@ -92,7 +92,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Ok"))
-		err = base.UpdateCounterValue(vars["metricType"], vars["metricValue"])
+		err = base.UpdateCounterValue("PollCount", vars["metricValue"])
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Server error"))
@@ -126,8 +126,9 @@ func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 		w.Write([]byte(x))
 		r.Body.Close()
 	case "counter":
-
+		log.Println("xxxxxxx" + vars["metricType"] + "////" + vars["metricName"] + "///////////////" + vars["metricValue"])
 		x, err := base.ReadValue(vars["metricName"])
+
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("Unknown statName"))
