@@ -57,7 +57,7 @@ func InitDatabase() DataBase {
 
 	metricData.Write("Sys", "0")
 	metricData.Write("TotalAlloc", "0")
-	metricData.Write("PollCount", "123")
+	metricData.Write("PollCount", "0")
 	metricData.Write("RandomValue", "0")
 
 	return *metricData
