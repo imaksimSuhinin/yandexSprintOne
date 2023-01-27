@@ -92,7 +92,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Ok"))
-		err = base.UpdateCounterValue("PollCount", vars["metricValue"])
+		err = base.UpdateCounterValue("PollCount", vars["metricName"])
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Server error"))
