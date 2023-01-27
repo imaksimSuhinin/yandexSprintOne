@@ -137,6 +137,7 @@ func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 		w.Write([]byte(name))
 		r.Body.Close()
 	default:
+		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("Unknown statName"))
 		r.Body.Close()
 	}
