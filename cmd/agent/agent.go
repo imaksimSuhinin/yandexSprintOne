@@ -21,5 +21,4 @@ func main() {
 		_ = <-upload.C
 		z.PostMetrics(client)
 	}
-
 }

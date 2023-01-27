@@ -54,38 +54,28 @@ var PollCount = 0
 
 func (m *Metrics) UpdateMetrics() *Metrics {
 	var rtm runtime.MemStats
-
 	PollCount++
 	m.PollCount = count(PollCount)
 	rand.Seed(time.Now().Unix())
 	m.RandomValue = gauge(rand.Intn(100) + 1)
-
 	runtime.ReadMemStats(&rtm)
-
 	m.NumGoroutine = gauge(runtime.NumGoroutine())
-
 	m.Alloc = gauge(rtm.Alloc)
 	m.TotalAlloc = gauge(rtm.TotalAlloc)
 	m.Sys = gauge(rtm.Sys)
 	m.Mallocs = gauge(rtm.Mallocs)
 	m.Frees = gauge(rtm.Frees)
-
 	m.LiveObjects = m.Mallocs - m.Frees
-
 	m.PauseTotalNs = gauge(rtm.PauseTotalNs)
 	m.NumGC = gauge(rtm.NumGC)
-
 	m.PollCount = count(PollCount)
-
 	rand.Seed(time.Now().Unix())
 	m.RandomValue = gauge(rand.Intn(10000) + 1)
 	log.Println("refresh...")
-
 	return m
 }
 
 func (mertics *Metrics) PostMetrics(httpClient *resty.Client) {
-
 	b, _ := json.Marshal(&mertics)
 	var inInterface map[string]float64
 	json.Unmarshal(b, &inInterface)

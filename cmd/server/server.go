@@ -10,14 +10,14 @@ import (
 
 func main() {
 	database := data.InitDatabase()
-	r := mux.NewRouter()
 
+	r := mux.NewRouter()
 	r.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		handlers.ShowMetrics(writer, request, &database)
+		handlers.ShowMetrics(writer, request)
 	})
 	r.HandleFunc("/value/{metricType}/{metricName}",
 		func(writer http.ResponseWriter, request *http.Request) {
-			ShowValue(writer, request, &database)
+			handlers.ShowValue(writer, request, &database)
 		})
 	r.HandleFunc("/update/{metricType}/{metricName}/{metricValue}",
 		func(writer http.ResponseWriter, request *http.Request) {
@@ -27,14 +27,4 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
-
-	//m.Write("PollCount", vars["metricName"])
-	x := base.ReadValue(("PollCount"))
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(x))
-	//w.Write([]byte("Unknown statName"))
 }

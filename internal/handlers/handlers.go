@@ -13,6 +13,7 @@ import (
 type metric struct {
 	mtype, value string
 }
+
 type metricValue struct {
 	val       [8]byte
 	isCounter bool
@@ -23,7 +24,7 @@ var (
 	lastCounterData int64
 )
 
-func ShowMetrics(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
+func ShowMetrics(w http.ResponseWriter, r *http.Request) {
 	var stringMetricMap metric
 	vars := mux.Vars(r)
 	metricStringMap := make(map[string]metric)
@@ -34,7 +35,6 @@ func ShowMetrics(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 			metricStringMap[k] = stringMetricMap
 		} else {
 			stringMetricMap.mtype = "counter"
-			base.UpdateCounterValue("PollCount", vars["metricValue"])
 			stringMetricMap.value = vars["metricValue"]
 			metricStringMap[k] = stringMetricMap
 		}
@@ -96,4 +96,24 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 	}
 	log.Println(metricMap)
 
+}
+
+func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
+	vars := mux.Vars(r)
+	switch vars["metricType"] {
+	case "gauge":
+		name := vars["metricName"]
+		x := base.ReadValue(name)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(x))
+		r.Body.Close()
+	case "counter":
+		x := base.ReadValue(("PollCount"))
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(x))
+		r.Body.Close()
+	default:
+		w.Write([]byte("Unknown statName"))
+		r.Body.Close()
+	}
 }

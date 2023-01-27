@@ -18,6 +18,7 @@ func NewDataBase() DataBase {
 		RWMutex: &sync.RWMutex{},
 	}
 }
+
 func InitDatabase() DataBase {
 	var metricData = NewDataBase()
 
@@ -58,6 +59,7 @@ func InitDatabase() DataBase {
 
 	return metricData
 }
+
 func (m DataBase) Write(key, value string) error {
 	m.data[key] = value
 	return nil
@@ -66,30 +68,28 @@ func (m DataBase) Write(key, value string) error {
 func (m DataBase) Read(key string) string {
 	value, err := m.data[key]
 	if !err {
-		return ""
+		return key
 	}
 	return value
 }
-func (memStatsStorage DataBase) UpdateGaugeValue(key string, value float64) error {
-	return memStatsStorage.Write(key, fmt.Sprintf("%v", value))
+
+func (m DataBase) UpdateGaugeValue(key string, value float64) error {
+	return m.Write(key, fmt.Sprintf("%v", value))
 }
 
-func (memStatsStorage DataBase) UpdateCounterValue(key string, value string) error {
-	//Чтение старого значения
-	oldValue := memStatsStorage.Read(key)
-
-	//Конвертация в число
-	_, err := strconv.ParseInt(oldValue, 10, 64)
+func (m DataBase) UpdateCounterValue(key string, value string) error {
+	prevVal := m.Read(key)
+	prevValInt, err := strconv.ParseInt(prevVal, 10, 64)
+	lastValInt, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
 		return errors.New("MemStats value is not int64")
 	}
-
-	newValue := fmt.Sprintf("%v", value+oldValue)
-	memStatsStorage.Write(key, newValue)
-
+	res := prevValInt + lastValInt
+	newValue := fmt.Sprintf("%v", res)
+	m.Write(key, newValue)
 	return nil
 }
 
-func (memStatsStorage DataBase) ReadValue(key string) string {
-	return memStatsStorage.Read(key)
+func (m DataBase) ReadValue(key string) string {
+	return m.Read(key)
 }
