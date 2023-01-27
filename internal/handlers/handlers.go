@@ -68,13 +68,14 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 		m.val = converter.Float64ToBytes(f)
 		m.isCounter = false
 		metricMap[vars["metricName"]] = m
-		err = base.UpdateGaugeValue(vars["metricName"], f)
-		//if err != nil {
-		//	w.WriteHeader(http.StatusInternalServerError)
-		//	w.Write([]byte("Server error"))
-		//	return
-		//}
+
 		w.WriteHeader(http.StatusOK)
+		err = base.UpdateGaugeValue(vars["metricName"], f)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Server error"))
+			return
+		}
 		r.Body.Close()
 	case "counter":
 		c, err := strconv.ParseInt(vars["metricValue"], 10, 64)
@@ -88,20 +89,22 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 		m.val = converter.Int64ToBytes(lastCounterData)
 		m.isCounter = true
 		metricMap[vars["metricName"]] = m
-		err = base.UpdateCounterValue(vars["metricType"], vars["metricValue"])
-		//if err != nil {
-		//	w.WriteHeader(http.StatusInternalServerError)
-		//	w.Write([]byte("Server error"))
-		//	return
-		//}
+
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Ok"))
+		err = base.UpdateCounterValue(vars["metricType"], vars["metricValue"])
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Server error"))
+			return
+		}
 		r.Body.Close()
 	default:
 		log.Println("Type", vars["metricType"], "wrong")
 		outputMessage := "Type " + vars["metricType"] + " not supported, only [counter/gauge]"
 		w.WriteHeader(http.StatusNotImplemented)
 		w.Write([]byte(outputMessage))
+
 		r.Body.Close()
 	}
 	log.Println(metricMap)
