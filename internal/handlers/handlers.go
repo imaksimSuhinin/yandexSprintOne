@@ -120,6 +120,7 @@ func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("Unknown statName"))
+			return
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(x))
@@ -129,6 +130,7 @@ func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("Unknown statName"))
+			return
 		}
 		name := vars["metricName"] + x
 		w.WriteHeader(http.StatusOK)
