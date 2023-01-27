@@ -83,7 +83,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 		m.val = converter.Int64ToBytes(lastCounterData)
 		m.isCounter = true
 		metricMap[vars["metricName"]] = m
-		base.UpdateCounterValue("PollCount", string(lastCounterData))
+		base.UpdateCounterValue(vars["metricType"], vars["metricValue"])
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Ok"))
 		r.Body.Close()
