@@ -88,31 +88,27 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 			w.Write([]byte(err.Error()))
 			return
 		}
-		lastCounterData = lastCounterData + c // Change naming...
+		lastCounterData = lastCounterData + c
 		m.val = converter.Int64ToBytes(lastCounterData)
 		m.isCounter = true
 		metricMap[vars["metricName"]] = m
-
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Ok"))
-
 		err = base.UpdateCounterValue(vars["metricName"], vars["metricValue"])
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Server error"))
 			return
 		}
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Ok"))
 		r.Body.Close()
 	default:
 		log.Println("Type", vars["metricType"], "wrong")
 		outputMessage := "Type " + vars["metricType"] + " not supported, only [counter/gauge]"
 		w.WriteHeader(http.StatusNotImplemented)
 		w.Write([]byte(outputMessage))
-
 		r.Body.Close()
 	}
 	//log.Println(metricMap)
-
 }
 
 func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
