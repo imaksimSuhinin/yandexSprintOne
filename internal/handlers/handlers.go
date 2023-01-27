@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"github.com/gorilla/mux"
 	"html/template"
 	"log"
@@ -134,9 +135,12 @@ func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 			w.Write([]byte("Unknown statName"))
 			return
 		}
-
+		prevValInt, err := strconv.ParseInt(vars["metricName"], 10, 64)
+		if err != nil {
+			errors.New(" value is not int64")
+		}
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(x + vars["metricName"]))
+		w.Write([]byte(x + (string(prevValInt))))
 		r.Body.Close()
 	default:
 		w.WriteHeader(http.StatusNotFound)
