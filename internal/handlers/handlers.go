@@ -136,7 +136,7 @@ func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(x))
+		w.Write([]byte(x + vars["metricName"]))
 		r.Body.Close()
 	default:
 		w.WriteHeader(http.StatusNotFound)
