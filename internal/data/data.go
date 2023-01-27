@@ -97,7 +97,7 @@ func (m DataBase) UpdateCounterValue(key string, value string) error {
 func (m DataBase) ReadValue(key string) (string, error) {
 	value, err := m.data[key]
 	if !err {
-		return "", errors.New("Значение не найдено" + key)
+		return "Значение не найдено", errors.New("Значение не найдено" + key)
 	}
 	return value, nil
 }
