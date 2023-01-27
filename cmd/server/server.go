@@ -43,6 +43,6 @@ func ShowValue(w http.ResponseWriter, r *http.Request, m *data.DataBase) {
 	//x := m.GetData("PollCount")
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(x))
+	w.Write([]byte(newValue))
 	//w.Write([]byte("Unknown statName"))
 }
