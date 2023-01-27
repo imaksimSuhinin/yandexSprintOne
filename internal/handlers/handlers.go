@@ -140,7 +140,7 @@ func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 			errors.New(" value is not int64")
 		}
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(x + (string(prevValInt))))
+		w.Write([]byte((string(prevValInt))))
 		r.Body.Close()
 	default:
 		w.WriteHeader(http.StatusNotFound)
