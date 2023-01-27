@@ -34,7 +34,7 @@ func ShowMetrics(w http.ResponseWriter, r *http.Request) {
 			stringMetricMap.value = vars["metricValue"]
 			metricStringMap[k] = stringMetricMap
 		} else {
-			stringMetricMap.mtype = "count"
+			stringMetricMap.mtype = "counter"
 			stringMetricMap.value = vars["metricValue"]
 			metricStringMap[k] = stringMetricMap
 		}
@@ -78,7 +78,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 			return
 		}
 		r.Body.Close()
-	case "count":
+	case "counter":
 		c, err := strconv.ParseInt(vars["metricValue"], 10, 64)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)

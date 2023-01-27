@@ -86,7 +86,7 @@ func (m *Metrics) PostMetrics(httpClient *resty.Client) error {
 			mtype = "gauge"
 			mval = strconv.FormatFloat(val, 'f', -1, 64)
 		} else {
-			mtype = "count"
+			mtype = "counter"
 			mval = strconv.FormatFloat(val, 'f', -1, 64)
 		}
 
