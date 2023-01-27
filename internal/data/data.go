@@ -3,6 +3,7 @@ package data
 import (
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"sync"
 )
@@ -90,6 +91,7 @@ func (m DataBase) UpdateCounterValue(key string, value string) error {
 	}
 	res := prevValInt + lastValInt
 	newValue := fmt.Sprintf("%v", res)
+	log.Println("NEWVALUE:" + newValue + "=" + prevVal + "last" + value)
 	m.Write(key, newValue)
 	return nil
 }
