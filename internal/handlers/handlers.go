@@ -129,18 +129,19 @@ func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 		w.Write([]byte(x))
 		r.Body.Close()
 	case "counter":
-		_, err := base.ReadValue("PollCount")
+		//x, err := base.ReadValue("PollCount")
+		x, err := base.ReadValue(vars["metricName"])
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("Unknown statName"))
 			return
 		}
-		prevValInt, err := strconv.ParseInt(vars["metricName"], 10, 64)
+		//	prevValInt, err := strconv.ParseInt(vars["metricName"], 10, 64)
 		if err != nil {
 			errors.New(" value is not int64")
 		}
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte((string(prevValInt))))
+		w.Write([]byte(x))
 		r.Body.Close()
 	default:
 		w.WriteHeader(http.StatusNotFound)
