@@ -11,8 +11,8 @@ func main() {
 	client := resty.New()
 	var m loc_metric.Metrics
 
-	refresh := time.NewTicker(1 * time.Second)
-	upload := time.NewTicker(2 * time.Second)
+	refresh := time.NewTicker(2 * time.Second)
+	upload := time.NewTicker(10 * time.Second)
 
 	for {
 		<-refresh.C
