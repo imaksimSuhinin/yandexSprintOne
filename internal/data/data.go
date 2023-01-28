@@ -83,10 +83,12 @@ func (m DataBase) UpdateCounterValue(key string, value string) error {
 	prevVal := m.Read(key)
 	prevValInt, err := strconv.ParseInt(prevVal, 10, 64)
 	if err != nil {
+		m.Write(key, "12345")
 		return errors.New(" value is not int64")
 	}
 	lastValInt, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
+		m.Write(key, "67890")
 		return errors.New(" value is not int64")
 	}
 	res := prevValInt + lastValInt
