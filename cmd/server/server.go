@@ -14,7 +14,7 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
 		handlers.ShowMetrics(writer, request)
-	})
+	}).Methods("GET")
 	r.HandleFunc("/value/{metricType}/{metricName}",
 		func(writer http.ResponseWriter, request *http.Request) {
 			handlers.ShowValue(writer, request, &database)
@@ -22,7 +22,7 @@ func main() {
 	r.HandleFunc("/update/{metricType}/{metricName}/{metricValue}",
 		func(writer http.ResponseWriter, request *http.Request) {
 			handlers.PostMetricHandler(writer, request, &database)
-		})
+		}).Methods("POST")
 	err := http.ListenAndServe(":8080", r)
 	if err != nil {
 		log.Fatal(err)
