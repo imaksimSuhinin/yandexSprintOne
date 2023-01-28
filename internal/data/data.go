@@ -70,7 +70,7 @@ func (m DataBase) Read(key string) string {
 	value, err := m.data[key]
 	if !err {
 
-		return "123"
+		return ""
 	}
 	return value
 }
