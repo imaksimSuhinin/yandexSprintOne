@@ -18,7 +18,7 @@ func main() {
 	r.HandleFunc("/value/{metricType}/{metricName}",
 		func(writer http.ResponseWriter, request *http.Request) {
 			handlers.ShowValue(writer, request, &database)
-		}).Methods("POST")
+		}).Methods("GET")
 	r.HandleFunc("/update/{metricType}/{metricName}/{metricValue}",
 		func(writer http.ResponseWriter, request *http.Request) {
 			handlers.PostMetricHandler(writer, request, &database)
