@@ -13,7 +13,7 @@ import (
 )
 
 type gauge float64
-type count int64
+type counter int64
 
 type Metrics struct {
 	Alloc,
@@ -47,7 +47,7 @@ type Metrics struct {
 	NumGoroutine,
 	RandomValue gauge
 
-	PollCount count
+	PollCount counter
 }
 
 var PollCount = 0
@@ -55,7 +55,7 @@ var PollCount = 0
 func (m *Metrics) UpdateMetrics() *Metrics {
 	var rtm runtime.MemStats
 	PollCount++
-	m.PollCount = count(PollCount)
+	m.PollCount = counter(PollCount)
 	rand.Seed(time.Now().Unix())
 	m.RandomValue = gauge(rand.Intn(100) + 1)
 	runtime.ReadMemStats(&rtm)
@@ -68,7 +68,7 @@ func (m *Metrics) UpdateMetrics() *Metrics {
 	m.LiveObjects = m.Mallocs - m.Frees
 	m.PauseTotalNs = gauge(rtm.PauseTotalNs)
 	m.NumGC = gauge(rtm.NumGC)
-	m.PollCount = count(PollCount)
+	m.PollCount = counter(PollCount)
 	rand.Seed(time.Now().Unix())
 	m.RandomValue = gauge(rand.Intn(10000) + 1)
 	log.Println("refresh...")
@@ -86,7 +86,7 @@ func (m *Metrics) PostMetrics(httpClient *resty.Client) error {
 			mtype = "gauge"
 			mval = strconv.FormatFloat(val, 'f', -1, 64)
 		} else {
-			mtype = "gauge"
+			mtype = "counter"
 			mval = strconv.FormatFloat(val, 'f', -1, 64)
 		}
 

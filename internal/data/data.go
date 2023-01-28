@@ -68,7 +68,7 @@ func (m DataBase) Write(key, value string) error {
 func (m DataBase) Read(key string) string {
 	value, err := m.data[key]
 	if !err {
-
+		value = "0"
 		return key
 	}
 	return value
