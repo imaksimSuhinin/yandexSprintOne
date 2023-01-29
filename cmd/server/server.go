@@ -29,9 +29,8 @@ func main() {
 
 	database := data.InitDatabase()
 
-	go startServer(database)
-	time.Sleep(30 * time.Second)
-	closer.Close()
+	startServer(database)
+
 }
 
 func startServer(database data.DataBase) {
