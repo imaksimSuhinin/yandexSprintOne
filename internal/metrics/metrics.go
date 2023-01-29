@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-resty/resty/v2"
+	"github.com/xlab/closer"
 	"log"
 	"math/rand"
 	"runtime"
@@ -114,4 +115,8 @@ func (m *Metrics) PostMetrics(httpClient *resty.Client) error {
 	}
 	log.Println("Post...")
 	return nil
+}
+
+func StopClient() {
+	closer.Close()
 }

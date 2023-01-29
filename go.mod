@@ -6,6 +6,7 @@ require (
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/gorilla/mux v1.8.0
 	github.com/stretchr/testify v1.8.1
+	github.com/xlab/closer v1.1.0
 )
 
 require (
