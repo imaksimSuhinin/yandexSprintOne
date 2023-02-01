@@ -4,18 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"sync"
 )
 
 type DataBase struct {
 	data map[string]string
-	*sync.RWMutex
 }
 
 func NewDataBase() DataBase {
 	return DataBase{
-		data:    make(map[string]string),
-		RWMutex: &sync.RWMutex{},
+		data: make(map[string]string),
 	}
 }
 
