@@ -112,7 +112,7 @@ func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 		resp, err = client.Do(req)
 		if err != nil {
 			fmt.Println(err)
-
+			defer resp.Body.Close()
 		}
 		if resp.StatusCode != 200 {
 			return errors.New("HTTP Status != 200")
