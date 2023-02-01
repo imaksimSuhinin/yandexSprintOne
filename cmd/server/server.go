@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/gorilla/mux"
 	"github.com/xlab/closer"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -22,18 +23,20 @@ func init() {
 		syscall.SIGQUIT,
 		syscall.SIGTERM,
 	}
+
 }
 
 func main() {
 	closer.Bind(Exit)
 	database := data.InitDatabase()
-	startServer(database)
+	var template = handlers.ParseTemplate("internal/html/index.html")
+	startServer(database, template)
 }
 
-func startServer(database data.DataBase) {
+func startServer(database data.DataBase, template *template.Template) {
 	r := mux.NewRouter()
 	r.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		handlers.ShowMetrics(writer, request)
+		handlers.ShowMetrics(writer, request, template)
 	}).Methods("GET")
 	r.HandleFunc("/value/{metricType}/{metricName}",
 		func(writer http.ResponseWriter, request *http.Request) {
@@ -52,7 +55,6 @@ func startServer(database data.DataBase) {
 	err := httpServer.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
-
 	}
 }
 

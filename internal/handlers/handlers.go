@@ -24,7 +24,7 @@ var (
 	lastCounterData int64
 )
 
-func ShowMetrics(w http.ResponseWriter, r *http.Request) {
+func ShowMetrics(w http.ResponseWriter, r *http.Request, template *template.Template) {
 	var stringMetricMap metric
 	vars := mux.Vars(r)
 	metricStringMap := make(map[string]metric)
@@ -41,9 +41,13 @@ func ShowMetrics(w http.ResponseWriter, r *http.Request) {
 
 	}
 	log.Println(stringMetricMap.value)
-	Templ, _ := template.ParseFiles("internal/html/index.html")
 	w.WriteHeader(http.StatusOK)
-	Templ.Execute(w, metricMap)
+	template.Execute(w, metricMap)
+}
+
+func ParseTemplate(path string) *template.Template {
+	Temple, _ := template.ParseFiles(path)
+	return Temple
 }
 
 func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
