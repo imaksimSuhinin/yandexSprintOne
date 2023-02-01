@@ -33,7 +33,9 @@ func Exit() {
 }
 
 func startClient() {
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
 	var m loc_metric.Metrics
 	refresh := time.NewTicker(2 * time.Second)
 	upload := time.NewTicker(2 * time.Second)

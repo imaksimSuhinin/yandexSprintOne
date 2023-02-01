@@ -4,12 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
-	//"github.com/go-resty/resty/v2"
-
-	//"github.com/go-resty/resty/v2"
 	"log"
 	"math/rand"
+	"net/http"
 	"runtime"
 	"strconv"
 	"time"
@@ -83,9 +80,7 @@ func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 	b, _ := json.Marshal(&m)
 	var inInterface map[string]float64
 	json.Unmarshal(b, &inInterface)
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-	}
+
 	var resp *http.Response
 
 	for field, val := range inInterface {
@@ -109,7 +104,7 @@ func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 
 		req.Header.Add("Content-Type", "text/plain") // добавляем заголовок Accept
 
-		resp, err = client.Do(req)
+		resp, err = httpClient.Do(req)
 		if err != nil {
 			fmt.Println(err)
 			defer resp.Body.Close()
