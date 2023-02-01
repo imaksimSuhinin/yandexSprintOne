@@ -1,4 +1,4 @@
-module yandexSprintOne
+module github.com/imaksimSuhinin/yandexSprintOne
 
 go 1.19
 

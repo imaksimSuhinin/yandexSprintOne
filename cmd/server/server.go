@@ -2,12 +2,12 @@ package main
 
 import (
 	"github.com/go-chi/chi"
+	"github.com/imaksimSuhinin/yandexSprintOne/internal/data"
+	"github.com/imaksimSuhinin/yandexSprintOne/internal/handlers"
+	os "github.com/imaksimSuhinin/yandexSprintOne/internal/os"
 	"html/template"
 	"log"
 	"net/http"
-	"yandexSprintOne/internal/data"
-	"yandexSprintOne/internal/handlers"
-	os "yandexSprintOne/internal/os"
 )
 
 var (

@@ -3,12 +3,12 @@ package handlers
 import (
 	"github.com/go-chi/chi"
 	"github.com/gorilla/mux"
+	"github.com/imaksimSuhinin/yandexSprintOne/internal/converter"
+	"github.com/imaksimSuhinin/yandexSprintOne/internal/data"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
-	"yandexSprintOne/internal/converter"
-	"yandexSprintOne/internal/data"
 )
 
 type metric struct {

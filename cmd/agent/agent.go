@@ -1,10 +1,10 @@
 package main
 
 import (
+	loc_metric "github.com/imaksimSuhinin/yandexSprintOne/internal/metrics"
+	os "github.com/imaksimSuhinin/yandexSprintOne/internal/os"
 	"net/http"
 	"time"
-	loc_metric "yandexSprintOne/internal/metrics"
-	os "yandexSprintOne/internal/os"
 )
 
 func main() {
