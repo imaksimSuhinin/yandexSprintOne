@@ -1,35 +1,16 @@
 package main
 
 import (
-	"github.com/xlab/closer"
-	"log"
 	"net/http"
-	"os"
-	"syscall"
 	"time"
 	loc_metric "yandexSprintOne/internal/metrics"
+	os "yandexSprintOne/internal/os"
 )
-
-func init() {
-	log.SetFlags(log.Lshortfile | log.LstdFlags)
-	closer.DebugSignalSet = []os.Signal{
-		syscall.SIGINT,
-		syscall.SIGQUIT,
-		syscall.SIGTERM,
-	}
-}
 
 func main() {
 
-	closer.Bind(Exit)
-	startClient()
-
-}
-
-func Exit() {
-	log.Println("Exit...")
-	os.Exit(0)
-
+	go startClient()
+	os.UpdateOsSignal()
 }
 
 func startClient() {
@@ -38,7 +19,7 @@ func startClient() {
 	}
 	var m loc_metric.Metrics
 	refresh := time.NewTicker(2 * time.Second)
-	upload := time.NewTicker(2 * time.Second)
+	upload := time.NewTicker(10 * time.Second)
 
 	for {
 		<-refresh.C
@@ -46,6 +27,5 @@ func startClient() {
 
 		<-upload.C
 		m.PostMetrics(client)
-
 	}
 }

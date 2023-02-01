@@ -54,6 +54,7 @@ type Metrics struct {
 var PollCount = 0
 
 func (m *Metrics) UpdateMetrics() *Metrics {
+
 	var rtm runtime.MemStats
 	PollCount++
 	m.PollCount = counter(PollCount)
@@ -73,10 +74,12 @@ func (m *Metrics) UpdateMetrics() *Metrics {
 	rand.Seed(time.Now().Unix())
 	m.RandomValue = gauge(rand.Intn(10000) + 1)
 	log.Println("refresh...")
+
 	return m
 }
 
 func (m *Metrics) PostMetrics(httpClient *http.Client) error {
+
 	b, _ := json.Marshal(&m)
 	var inInterface map[string]float64
 	json.Unmarshal(b, &inInterface)
@@ -116,5 +119,6 @@ func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 	defer resp.Body.Close()
 
 	log.Println("Post...")
+
 	return nil
 }
