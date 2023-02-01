@@ -24,15 +24,16 @@ func main() {
 func startServer(database data.DataBase, template *template.Template) {
 	r := chi.NewRouter()
 
+	r.MethodFunc(http.MethodGet, "/value/{metricType}/{metricName}",
+		func(writer http.ResponseWriter, request *http.Request) {
+			handlers.ShowValue(writer, request, &database)
+		})
+
 	r.Route("/update", func(router chi.Router) {
 		r.MethodFunc(http.MethodGet, "/", func(writer http.ResponseWriter, request *http.Request) {
 			handlers.ShowMetrics(writer, request, template)
 		})
 
-		r.MethodFunc(http.MethodGet, "/value/{metricType}/{metricName}",
-			func(writer http.ResponseWriter, request *http.Request) {
-				handlers.ShowValue(writer, request, &database)
-			})
 		r.MethodFunc(http.MethodPost, "/update/{metricType}/{metricName}/{metricValue}",
 			func(writer http.ResponseWriter, request *http.Request) {
 				handlers.PostMetricHandler(writer, request, &database)
