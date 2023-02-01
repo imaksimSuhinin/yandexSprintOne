@@ -27,16 +27,16 @@ var (
 
 func ShowMetrics(w http.ResponseWriter, r *http.Request, template *template.Template) {
 	var stringMetricMap metric
-	vars := mux.Vars(r)
+	vars := chi.URLParam
 	metricStringMap := make(map[string]metric)
 	for k, v := range metricMap {
 		if !v.isCounter {
 			stringMetricMap.mtype = "gauge"
-			stringMetricMap.value = vars["metricValue"]
+			stringMetricMap.value = vars(r, "metricValue")
 			metricStringMap[k] = stringMetricMap
 		} else {
 			stringMetricMap.mtype = "counter"
-			stringMetricMap.value = vars["metricValue"]
+			stringMetricMap.value = vars(r, "metricValue")
 			metricStringMap[k] = stringMetricMap
 		}
 
