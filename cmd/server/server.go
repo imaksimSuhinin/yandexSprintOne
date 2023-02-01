@@ -26,7 +26,7 @@ func startServer(database data.DataBase, template *template.Template) {
 	r := mux.NewRouter()
 	r.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
 		handlers.ShowMetrics(writer, request, template)
-	}).Methods("GET")
+	}).Methods(http.MethodGet)
 	r.HandleFunc("/value/{metricType}/{metricName}",
 		func(writer http.ResponseWriter, request *http.Request) {
 			handlers.ShowValue(writer, request, &database)
@@ -34,7 +34,7 @@ func startServer(database data.DataBase, template *template.Template) {
 	r.HandleFunc("/update/{metricType}/{metricName}/{metricValue}",
 		func(writer http.ResponseWriter, request *http.Request) {
 			handlers.PostMetricHandler(writer, request, &database)
-		}).Methods("POST")
+		}).Methods(http.MethodPost)
 
 	httpServer := &http.Server{
 		Addr:    ":8080",
