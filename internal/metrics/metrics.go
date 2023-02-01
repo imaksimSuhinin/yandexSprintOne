@@ -83,6 +83,10 @@ func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 	b, _ := json.Marshal(&m)
 	var inInterface map[string]float64
 	json.Unmarshal(b, &inInterface)
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+	var resp *http.Response
 
 	for field, val := range inInterface {
 		var uri, mkey, mtype, mval string
@@ -97,19 +101,15 @@ func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 			mkey = field
 		}
 		fmt.Println(uri, mtype, mval)
-		client := &http.Client{
-			Timeout: 10 * time.Second,
-		}
+
 		host := "127.0.0.1"
 		port := "8080"
 
-		// добавляем заголовки
 		var req, err = http.NewRequest("POST", "http://"+host+":"+port+"/update/"+mtype+"/"+mkey+"/"+mval, nil)
 
-		// добавляем заголовки
 		req.Header.Add("Content-Type", "text/plain") // добавляем заголовок Accept
 
-		resp, err := client.Do(req)
+		resp, err = client.Do(req)
 		if err != nil {
 			fmt.Println(err)
 
@@ -118,6 +118,8 @@ func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 			return errors.New("HTTP Status != 200")
 		}
 	}
+	defer resp.Body.Close()
+
 	log.Println("Post...")
 	return nil
 }
