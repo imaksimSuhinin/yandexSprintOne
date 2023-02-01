@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/go-chi/chi"
 	"github.com/gorilla/mux"
 	"html/template"
 	"log"
@@ -60,10 +61,10 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 		return
 	}
 	var m metricValue
-	vars := mux.Vars(r)
-	switch vars["metricType"] {
+	vars := chi.URLParam
+	switch vars(r, "metricType") {
 	case "gauge":
-		f, err := strconv.ParseFloat(vars["metricValue"], 64)
+		f, err := strconv.ParseFloat(vars(r, "metricValue"), 64)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
@@ -71,10 +72,10 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 		}
 		m.val = converter.Float64ToBytes(f)
 		m.isCounter = false
-		metricMap[vars["metricName"]] = m
+		metricMap[vars(r, "metricName")] = m
 
 		w.WriteHeader(http.StatusOK)
-		err = base.UpdateGaugeValue(vars["metricName"], f)
+		err = base.UpdateGaugeValue(vars(r, "metricName"), f)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Server error"))
@@ -82,7 +83,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 		}
 		r.Body.Close()
 	case "counter":
-		c, err := strconv.ParseInt(vars["metricValue"], 10, 64)
+		c, err := strconv.ParseInt(vars(r, "metricValue"), 10, 64)
 		if err != nil {
 
 			w.WriteHeader(http.StatusBadRequest)
@@ -92,11 +93,11 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 		lastCounterData = lastCounterData + c // Change naming...
 		m.val = converter.Int64ToBytes(lastCounterData)
 		m.isCounter = true
-		metricMap[vars["metricName"]] = m
+		metricMap[vars(r, "metricName")] = m
 
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Ok"))
-		err = base.UpdateCounterValue(vars["metricName"], vars["metricValue"])
+		err = base.UpdateCounterValue(vars(r, "metricName"), vars(r, "metricValue"))
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Server error"))
@@ -104,8 +105,8 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 		}
 		r.Body.Close()
 	default:
-		log.Println("Type", vars["metricType"], "wrong")
-		outputMessage := "Type " + vars["metricType"] + " not supported, only [counter/gauge]"
+		log.Println("Type", vars(r, "metricType"), "wrong")
+		outputMessage := "Type " + vars(r, "metricType") + " not supported, only [counter/gauge]"
 		w.WriteHeader(http.StatusNotImplemented)
 		w.Write([]byte(outputMessage))
 

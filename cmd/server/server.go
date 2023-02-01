@@ -1,14 +1,13 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi"
 	"html/template"
 	"log"
 	"net/http"
-	os "yandexSprintOne/internal/os"
-
 	"yandexSprintOne/internal/data"
 	"yandexSprintOne/internal/handlers"
+	os "yandexSprintOne/internal/os"
 )
 
 var (
@@ -23,18 +22,22 @@ func main() {
 }
 
 func startServer(database data.DataBase, template *template.Template) {
-	r := mux.NewRouter()
-	r.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		handlers.ShowMetrics(writer, request, template)
-	}).Methods(http.MethodGet)
-	r.HandleFunc("/value/{metricType}/{metricName}",
-		func(writer http.ResponseWriter, request *http.Request) {
-			handlers.ShowValue(writer, request, &database)
+	r := chi.NewRouter()
+
+	r.Route("/update", func(router chi.Router) {
+		r.MethodFunc(http.MethodGet, "/", func(writer http.ResponseWriter, request *http.Request) {
+			handlers.ShowMetrics(writer, request, template)
 		})
-	r.HandleFunc("/update/{metricType}/{metricName}/{metricValue}",
-		func(writer http.ResponseWriter, request *http.Request) {
-			handlers.PostMetricHandler(writer, request, &database)
-		}).Methods(http.MethodPost)
+
+		r.MethodFunc(http.MethodGet, "/value/{metricType}/{metricName}",
+			func(writer http.ResponseWriter, request *http.Request) {
+				handlers.ShowValue(writer, request, &database)
+			})
+		r.MethodFunc(http.MethodPost, "/update/{metricType}/{metricName}/{metricValue}",
+			func(writer http.ResponseWriter, request *http.Request) {
+				handlers.PostMetricHandler(writer, request, &database)
+			})
+	})
 
 	httpServer := &http.Server{
 		Addr:    ":8080",
