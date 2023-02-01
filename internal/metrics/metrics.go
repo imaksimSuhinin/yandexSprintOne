@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-resty/resty/v2"
+	"net/http"
+	//"github.com/go-resty/resty/v2"
+
+	//"github.com/go-resty/resty/v2"
 	"log"
 	"math/rand"
 	"runtime"
@@ -13,6 +16,7 @@ import (
 )
 
 type gauge float64
+
 type counter int64
 
 type Metrics struct {
@@ -75,40 +79,42 @@ func (m *Metrics) UpdateMetrics() *Metrics {
 	return m
 }
 
-func (m *Metrics) PostMetrics(httpClient *resty.Client) error {
+func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 	b, _ := json.Marshal(&m)
 	var inInterface map[string]float64
 	json.Unmarshal(b, &inInterface)
 
 	for field, val := range inInterface {
-		var uri, mtype, mval string
+		var uri, mkey, mtype, mval string
+
 		if field != "PollCount" {
 			mtype = "gauge"
 			mval = strconv.FormatFloat(val, 'f', -1, 64)
+			mkey = field
 		} else {
 			mtype = "counter"
 			mval = strconv.FormatFloat(val, 'f', -1, 64)
+			mkey = field
 		}
+		fmt.Println(uri, mtype, mval)
+		client := &http.Client{
+			Timeout: 10 * time.Second,
+		}
+		host := "127.0.0.1"
+		port := "8080"
 
-		fmt.Println(uri)
-		httpClient.
-			SetRetryCount(3).
-			SetRetryWaitTime(10 * time.Second)
-		resp, err := httpClient.R().
-			SetPathParams(map[string]string{
-				"host":        "127.0.0.1",
-				"port":        strconv.Itoa(8080),
-				"metricType":  mtype,
-				"metricName":  field,
-				"metricValue": mval,
-			}).
-			SetHeader("Content-Type", "text/plain").
-			Post("http://{host}:{port}/update/{metricType}/{metricName}/{metricValue}")
+		// добавляем заголовки
+		var req, err = http.NewRequest("POST", "http://"+host+":"+port+"/update/"+mtype+"/"+mkey+"/"+mval, nil)
 
+		// добавляем заголовки
+		req.Header.Add("Content-Type", "text/plain") // добавляем заголовок Accept
+
+		resp, err := client.Do(req)
 		if err != nil {
-			return err
+			fmt.Println(err)
+
 		}
-		if resp.StatusCode() != 200 {
+		if resp.StatusCode != 200 {
 			return errors.New("HTTP Status != 200")
 		}
 	}

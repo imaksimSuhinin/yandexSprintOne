@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/go-resty/resty/v2"
 	"github.com/xlab/closer"
 	"log"
+	"net/http"
 	"os"
 	"syscall"
 	"time"
@@ -22,29 +22,28 @@ func init() {
 func main() {
 
 	closer.Bind(Exit)
-	strtClient()
+	startClient()
 
-}
-
-func strtClient() {
-	client := resty.New()
-	var m loc_metric.Metrics
-
-	refresh := time.NewTicker(2 * time.Second)
-	upload := time.NewTicker(10 * time.Second)
-
-	for {
-		<-refresh.C
-		var z = m.UpdateMetrics()
-
-		<-upload.C
-		z.PostMetrics(client)
-
-	}
 }
 
 func Exit() {
 	log.Println("Exit...")
 	os.Exit(0)
 
+}
+
+func startClient() {
+	client := &http.Client{}
+	var m loc_metric.Metrics
+	refresh := time.NewTicker(2 * time.Second)
+	upload := time.NewTicker(2 * time.Second)
+
+	for {
+		<-refresh.C
+		m.UpdateMetrics()
+
+		<-upload.C
+		m.PostMetrics(client)
+
+	}
 }
