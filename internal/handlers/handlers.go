@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"github.com/go-chi/chi"
-	"github.com/gorilla/mux"
 	"github.com/imaksimSuhinin/yandexSprintOne/internal/converter"
 	"github.com/imaksimSuhinin/yandexSprintOne/internal/data"
 	"html/template"
@@ -117,10 +116,10 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 }
 
 func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
-	vars := mux.Vars(r)
-	switch vars["metricType"] {
+	vars := chi.URLParam
+	switch vars(r, "metricType") {
 	case "gauge":
-		name := vars["metricName"]
+		name := vars(r, "metricName")
 		x, err := base.ReadValue(name)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
@@ -132,7 +131,7 @@ func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 		r.Body.Close()
 	case "counter":
 
-		x, err := base.ReadValue(vars["metricName"])
+		x, err := base.ReadValue(vars(r, "metricName"))
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("Unknown statName"))
