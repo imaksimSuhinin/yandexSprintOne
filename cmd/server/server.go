@@ -1,36 +1,55 @@
 package main
 
 import (
-	"context"
+	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/xlab/closer"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"syscall"
-	"time"
 	"yandexSprintOne/internal/data"
 	"yandexSprintOne/internal/handlers"
 )
 
-var httpServer http.Server
-
-func init() {
-	log.SetFlags(log.Lshortfile | log.LstdFlags)
-	closer.DebugSignalSet = []os.Signal{
-		syscall.SIGINT,
-		syscall.SIGQUIT,
-		syscall.SIGTERM,
-	}
-
-}
+var (
+	httpServer  http.Server
+	database    = data.InitDatabase()
+	getTemplate = handlers.ParseTemplate("internal/html/index.html")
+)
 
 func main() {
-	closer.Bind(Exit)
-	database := data.InitDatabase()
-	var template = handlers.ParseTemplate("internal/html/index.html")
-	startServer(database, template)
+	go startServer(database, getTemplate)
+	updateOsSignal()
+}
+
+func updateOsSignal() {
+	sigChanel := make(chan os.Signal, 1)
+	signal.Notify(sigChanel)
+	exitChanel := make(chan int)
+	s := <-sigChanel
+	handleOsSignal(s)
+	exitCode := <-exitChanel
+	os.Exit(exitCode)
+}
+
+func handleOsSignal(signal os.Signal) {
+	if signal == syscall.SIGTERM {
+		fmt.Println("Got kill signal. ")
+		fmt.Println("Program will terminate now.")
+		os.Exit(0)
+	} else if signal == syscall.SIGINT {
+		fmt.Println("Got CTRL+C signal")
+		fmt.Println("Closing.")
+		os.Exit(0)
+	} else if signal == syscall.SIGQUIT {
+		fmt.Println("Got Quit signal")
+		fmt.Println("Closing.")
+		os.Exit(0)
+	} else {
+		fmt.Println("Ignoring signal: ", signal)
+	}
 }
 
 func startServer(database data.DataBase, template *template.Template) {
@@ -56,12 +75,4 @@ func startServer(database data.DataBase, template *template.Template) {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func Exit() {
-	gracefulCtx, cancelShutdown := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancelShutdown()
-	httpServer.Shutdown(gracefulCtx)
-	log.Println("Exit...")
-	os.Exit(0)
 }
