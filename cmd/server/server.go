@@ -29,10 +29,11 @@ func startServer(database data.DataBase, template *template.Template) {
 			handlers.ShowValue(writer, request, &database)
 		})
 
+	r.MethodFunc(http.MethodGet, "/", func(writer http.ResponseWriter, request *http.Request) {
+		handlers.ShowMetrics(writer, request, template)
+	})
+
 	r.Route("/update", func(router chi.Router) {
-		r.MethodFunc(http.MethodGet, "/", func(writer http.ResponseWriter, request *http.Request) {
-			handlers.ShowMetrics(writer, request, template)
-		})
 
 		r.MethodFunc(http.MethodPost, "/update/{metricType}/{metricName}/{metricValue}",
 			func(writer http.ResponseWriter, request *http.Request) {
