@@ -19,7 +19,7 @@ func main() {
 	var client = startClient()
 	upload := time.NewTicker(delayUpload * time.Second)
 	refresh := time.NewTicker(delayRefresh * time.Second)
-	os.UpdateOsSignal()
+
 	for {
 		select {
 		case <-upload.C:
@@ -28,6 +28,7 @@ func main() {
 			metrics.UpdateMetrics()
 		}
 	}
+	os.UpdateOsSignal()
 }
 
 func startClient() *http.Client {
