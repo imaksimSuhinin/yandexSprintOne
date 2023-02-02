@@ -16,9 +16,16 @@ const (
 func main() {
 
 	var metrics loc_metric.Metrics
-	go getRefresh(&metrics)
-	go startClient()
-	go getUpload(&metrics, startClient())
+	upload := time.NewTicker(delayUpload * time.Second)
+	refresh := time.NewTicker(delayRefresh * time.Second)
+	for {
+		select {
+		case <-upload.C:
+			metrics.PostMetrics(startClient())
+		case <-refresh.C:
+			metrics.UpdateMetrics()
+		}
+	}
 	os.UpdateOsSignal()
 }
 
@@ -28,25 +35,4 @@ func startClient() *http.Client {
 	}
 
 	return client
-}
-
-func getUpload(m *loc_metric.Metrics, client *http.Client) {
-	upload := time.NewTicker(delayUpload * time.Second)
-	for true {
-		select {
-		case <-upload.C:
-			m.PostMetrics(client)
-		}
-	}
-}
-
-func getRefresh(m *loc_metric.Metrics) {
-	refresh := time.NewTicker(delayRefresh * time.Second)
-
-	for true {
-		select {
-		case <-refresh.C:
-			m.UpdateMetrics()
-		}
-	}
 }
