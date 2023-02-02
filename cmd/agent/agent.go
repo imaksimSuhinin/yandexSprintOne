@@ -17,6 +17,7 @@ func main() {
 
 	var metrics loc_metric.Metrics
 	var client = startClient()
+
 	upload := time.NewTicker(delayUpload * time.Second)
 	refresh := time.NewTicker(delayRefresh * time.Second)
 
@@ -26,9 +27,10 @@ func main() {
 			metrics.PostMetrics(client)
 		case <-refresh.C:
 			metrics.UpdateMetrics()
+		case <-os.SigChanel:
+			os.UpdateOsSignal()
 		}
 	}
-	os.UpdateOsSignal()
 }
 
 func startClient() *http.Client {

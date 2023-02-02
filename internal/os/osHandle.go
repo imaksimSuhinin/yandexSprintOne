@@ -7,6 +7,8 @@ import (
 	"syscall"
 )
 
+var SigChanel = make(chan os.Signal, 1)
+
 func HandleOsSignal(signal os.Signal) {
 	if signal == syscall.SIGTERM {
 		fmt.Println("Got kill signal. ")
@@ -26,10 +28,10 @@ func HandleOsSignal(signal os.Signal) {
 }
 
 func UpdateOsSignal() {
-	sigChanel := make(chan os.Signal, 1)
-	signal.Notify(sigChanel)
+
+	signal.Notify(SigChanel)
 	exitChanel := make(chan int)
-	s := <-sigChanel
+	s := <-SigChanel
 	HandleOsSignal(s)
 	exitCode := <-exitChanel
 	os.Exit(exitCode)
