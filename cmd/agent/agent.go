@@ -2,7 +2,7 @@ package main
 
 import (
 	loc_metric "github.com/imaksimSuhinin/yandexSprintOne/internal/metrics"
-	os "github.com/imaksimSuhinin/yandexSprintOne/internal/os"
+	"github.com/imaksimSuhinin/yandexSprintOne/internal/os"
 	"net/http"
 	"time"
 )
@@ -16,17 +16,18 @@ const (
 func main() {
 
 	var metrics loc_metric.Metrics
+	var client = startClient()
 	upload := time.NewTicker(delayUpload * time.Second)
 	refresh := time.NewTicker(delayRefresh * time.Second)
+	os.UpdateOsSignal()
 	for {
 		select {
 		case <-upload.C:
-			metrics.PostMetrics(startClient())
+			metrics.PostMetrics(client)
 		case <-refresh.C:
 			metrics.UpdateMetrics()
 		}
 	}
-	os.UpdateOsSignal()
 }
 
 func startClient() *http.Client {
