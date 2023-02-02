@@ -12,6 +12,18 @@ import (
 	"time"
 )
 
+const (
+	MetricTypeGauge   string = "gauge"
+	MetricTypeCounter string = "counter"
+)
+
+const (
+	host             string = "127.0.0.1"
+	port             string = "8080"
+	contentTypeKey   string = "Content-Type"
+	contentTypeValue string = "text/plain"
+)
+
 type gauge float64
 
 type counter int64
@@ -90,22 +102,19 @@ func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 		var uri, mkey, mtype, mval string
 
 		if field != "PollCount" {
-			mtype = "gauge"
+			mtype = MetricTypeGauge
 			mval = strconv.FormatFloat(val, 'f', -1, 64)
 			mkey = field
 		} else {
-			mtype = "counter"
+			mtype = MetricTypeCounter
 			mval = strconv.FormatFloat(val, 'f', -1, 64)
 			mkey = field
 		}
 		fmt.Println(uri, mtype, mval)
 
-		host := "127.0.0.1"
-		port := "8080"
-
 		var req, err = http.NewRequest("POST", "http://"+host+":"+port+"/update/"+mtype+"/"+mkey+"/"+mval, nil)
 
-		req.Header.Add("Content-Type", "text/plain") // добавляем заголовок Accept
+		req.Header.Add(contentTypeKey, contentTypeValue) // добавляем заголовок Accept
 
 		resp, err = httpClient.Do(req)
 		if err != nil {

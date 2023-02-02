@@ -7,6 +7,12 @@ import (
 	"time"
 )
 
+const (
+	delayRefresh      time.Duration = 2
+	delayUpload       time.Duration = 10
+	httpClientTimeOut time.Duration = 10
+)
+
 func main() {
 
 	var metrics loc_metric.Metrics
@@ -18,14 +24,14 @@ func main() {
 
 func startClient() *http.Client {
 	client := &http.Client{
-		Timeout: 10 * time.Second,
+		Timeout: httpClientTimeOut * time.Second,
 	}
 
 	return client
 }
 
 func getUpload(m *loc_metric.Metrics, client *http.Client) {
-	upload := time.NewTicker(10 * time.Second)
+	upload := time.NewTicker(delayUpload * time.Second)
 	for {
 		<-upload.C
 		m.PostMetrics(client)
@@ -33,7 +39,7 @@ func getUpload(m *loc_metric.Metrics, client *http.Client) {
 }
 
 func getRefresh(m *loc_metric.Metrics) {
-	refresh := time.NewTicker(2 * time.Second)
+	refresh := time.NewTicker(delayRefresh * time.Second)
 
 	for {
 		<-refresh.C

@@ -10,6 +10,10 @@ import (
 	"net/http"
 )
 
+const (
+	httpServerAddress string = ":8080"
+)
+
 var (
 	httpServer  http.Server
 	database    = data.DataStorage{}
@@ -43,7 +47,7 @@ func startServer(database data.DataStorage, template *template.Template) {
 	})
 
 	httpServer := &http.Server{
-		Addr:    ":8080",
+		Addr:    httpServerAddress,
 		Handler: r,
 	}
 
