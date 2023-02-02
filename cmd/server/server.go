@@ -12,16 +12,17 @@ import (
 
 var (
 	httpServer  http.Server
-	database    = data.InitDatabase()
+	database    = data.DataStorage{}
 	getTemplate = handlers.ParseTemplate("internal/html/index.html")
 )
 
 func main() {
+	database = data.InitDatabase()
 	go startServer(database, getTemplate)
 	os.UpdateOsSignal()
 }
 
-func startServer(database data.DataBase, template *template.Template) {
+func startServer(database data.DataStorage, template *template.Template) {
 	r := chi.NewRouter()
 
 	r.MethodFunc(http.MethodGet, "/", func(writer http.ResponseWriter, request *http.Request) {
@@ -30,9 +31,9 @@ func startServer(database data.DataBase, template *template.Template) {
 
 	r.MethodFunc(http.MethodGet, "/value/{metricType}/{metricName}",
 		func(writer http.ResponseWriter, request *http.Request) {
-			handlers.ShowValue(writer, request, &database)
+			handlers.ShowValue(writer, request, database)
 		})
-	
+
 	r.Route("/update", func(router chi.Router) {
 
 		r.MethodFunc(http.MethodPost, "/update/{metricType}/{metricName}/{metricValue}",

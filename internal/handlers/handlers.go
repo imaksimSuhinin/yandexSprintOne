@@ -50,7 +50,7 @@ func ParseTemplate(path string) *template.Template {
 	return Temple
 }
 
-func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
+func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataStorage) {
 	reqMethod := r.Method
 	if reqMethod != "POST" {
 		outputMessage := "Only POST method is alload"
@@ -74,7 +74,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 		metricMap[vars(r, "metricName")] = m
 
 		w.WriteHeader(http.StatusOK)
-		err = base.UpdateGaugeValue(vars(r, "metricName"), f)
+		err = base.Data.UpdateGaugeValue(vars(r, "metricName"), f)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Server error"))
@@ -96,7 +96,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Ok"))
-		err = base.UpdateCounterValue(vars(r, "metricName"), vars(r, "metricValue"))
+		err = base.Data.UpdateCounterValue(vars(r, "metricName"), vars(r, "metricValue"))
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Server error"))
@@ -115,12 +115,12 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 
 }
 
-func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
+func ShowValue(w http.ResponseWriter, r *http.Request, base data.DataStorage) {
 	vars := chi.URLParam
 	switch vars(r, "metricType") {
 	case "gauge":
 		name := vars(r, "metricName")
-		x, err := base.ReadValue(name)
+		x, err := base.Data.ReadValue(name)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("Unknown statName"))
@@ -131,7 +131,7 @@ func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 		r.Body.Close()
 	case "counter":
 
-		x, err := base.ReadValue(vars(r, "metricName"))
+		x, err := base.Data.ReadValue(vars(r, "metricName"))
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("Unknown statName"))
