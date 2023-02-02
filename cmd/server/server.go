@@ -1,65 +1,58 @@
 package main
 
 import (
-	"context"
-	"github.com/gorilla/mux"
-	"github.com/xlab/closer"
+	"github.com/go-chi/chi"
+	"github.com/imaksimSuhinin/yandexSprintOne/internal/data"
+	"github.com/imaksimSuhinin/yandexSprintOne/internal/handlers"
+	os "github.com/imaksimSuhinin/yandexSprintOne/internal/os"
+	"html/template"
 	"log"
 	"net/http"
-	"os"
-	"syscall"
-	"time"
-	"yandexSprintOne/internal/data"
-	"yandexSprintOne/internal/handlers"
 )
 
-var httpServer http.Server
+const (
+	httpServerAddress string = ":8080"
+)
 
-func init() {
-	log.SetFlags(log.Lshortfile | log.LstdFlags)
-	closer.DebugSignalSet = []os.Signal{
-		syscall.SIGINT,
-		syscall.SIGQUIT,
-		syscall.SIGTERM,
-	}
-}
+var (
+	httpServer  http.Server
+	database    = data.DataStorage{}
+	getTemplate = handlers.ParseTemplate("internal/html/index.html")
+)
 
 func main() {
-	closer.Bind(Exit)
-	database := data.InitDatabase()
-	startServer(database)
+	database = data.InitDatabase()
+	go startServer(database, getTemplate)
+	os.UpdateOsSignal()
 }
 
-func startServer(database data.DataBase) {
-	r := mux.NewRouter()
-	r.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		handlers.ShowMetrics(writer, request)
-	}).Methods("GET")
-	r.HandleFunc("/value/{metricType}/{metricName}",
+func startServer(database data.DataStorage, template *template.Template) {
+	r := chi.NewRouter()
+
+	r.MethodFunc(http.MethodGet, "/", func(writer http.ResponseWriter, request *http.Request) {
+		handlers.ShowMetrics(writer, request, template)
+	})
+
+	r.MethodFunc(http.MethodGet, "/value/{metricType}/{metricName}",
 		func(writer http.ResponseWriter, request *http.Request) {
-			handlers.ShowValue(writer, request, &database)
+			handlers.ShowValue(writer, request, database)
 		})
-	r.HandleFunc("/update/{metricType}/{metricName}/{metricValue}",
-		func(writer http.ResponseWriter, request *http.Request) {
-			handlers.PostMetricHandler(writer, request, &database)
-		}).Methods("POST")
+
+	r.Route("/update", func(router chi.Router) {
+
+		r.MethodFunc(http.MethodPost, "/update/{metricType}/{metricName}/{metricValue}",
+			func(writer http.ResponseWriter, request *http.Request) {
+				handlers.PostMetricHandler(writer, request, &database)
+			})
+	})
 
 	httpServer := &http.Server{
-		Addr:    ":8080",
+		Addr:    httpServerAddress,
 		Handler: r,
 	}
 
 	err := httpServer.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
-
 	}
-}
-
-func Exit() {
-	gracefulCtx, cancelShutdown := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancelShutdown()
-	httpServer.Shutdown(gracefulCtx)
-	log.Println("Exit...")
-	os.Exit(0)
 }

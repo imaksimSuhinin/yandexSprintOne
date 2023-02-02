@@ -4,15 +4,28 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-resty/resty/v2"
 	"log"
 	"math/rand"
+	"net/http"
 	"runtime"
 	"strconv"
 	"time"
 )
 
+const (
+	MetricTypeGauge   string = "gauge"
+	MetricTypeCounter string = "counter"
+)
+
+const (
+	host             string = "127.0.0.1"
+	port             string = "8080"
+	contentTypeKey   string = "Content-Type"
+	contentTypeValue string = "text/plain"
+)
+
 type gauge float64
+
 type counter int64
 
 type Metrics struct {
@@ -53,6 +66,7 @@ type Metrics struct {
 var PollCount = 0
 
 func (m *Metrics) UpdateMetrics() *Metrics {
+
 	var rtm runtime.MemStats
 	PollCount++
 	m.PollCount = counter(PollCount)
@@ -72,46 +86,48 @@ func (m *Metrics) UpdateMetrics() *Metrics {
 	rand.Seed(time.Now().Unix())
 	m.RandomValue = gauge(rand.Intn(10000) + 1)
 	log.Println("refresh...")
+
 	return m
 }
 
-func (m *Metrics) PostMetrics(httpClient *resty.Client) error {
+func (m *Metrics) PostMetrics(httpClient *http.Client) error {
+
 	b, _ := json.Marshal(&m)
 	var inInterface map[string]float64
 	json.Unmarshal(b, &inInterface)
 
+	var resp *http.Response
+
 	for field, val := range inInterface {
-		var uri, mtype, mval string
+		var uri, mkey, mtype, mval string
+
 		if field != "PollCount" {
-			mtype = "gauge"
+			mtype = MetricTypeGauge
 			mval = strconv.FormatFloat(val, 'f', -1, 64)
+			mkey = field
 		} else {
-			mtype = "counter"
+			mtype = MetricTypeCounter
 			mval = strconv.FormatFloat(val, 'f', -1, 64)
+			mkey = field
 		}
+		fmt.Println(uri, mtype, mval)
 
-		fmt.Println(uri)
-		httpClient.
-			SetRetryCount(3).
-			SetRetryWaitTime(10 * time.Second)
-		resp, err := httpClient.R().
-			SetPathParams(map[string]string{
-				"host":        "127.0.0.1",
-				"port":        strconv.Itoa(8080),
-				"metricType":  mtype,
-				"metricName":  field,
-				"metricValue": mval,
-			}).
-			SetHeader("Content-Type", "text/plain").
-			Post("http://{host}:{port}/update/{metricType}/{metricName}/{metricValue}")
+		var req, err = http.NewRequest("POST", "http://"+host+":"+port+"/update/"+mtype+"/"+mkey+"/"+mval, nil)
 
+		req.Header.Add(contentTypeKey, contentTypeValue) // добавляем заголовок Accept
+
+		resp, err = httpClient.Do(req)
 		if err != nil {
-			return err
+			fmt.Println(err)
+			defer resp.Body.Close()
 		}
-		if resp.StatusCode() != 200 {
+		if resp.StatusCode != 200 {
 			return errors.New("HTTP Status != 200")
 		}
 	}
+	defer resp.Body.Close()
+
 	log.Println("Post...")
+
 	return nil
 }

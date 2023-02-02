@@ -1,50 +1,48 @@
 package main
 
 import (
-	"github.com/go-resty/resty/v2"
-	"github.com/xlab/closer"
-	"log"
-	"os"
-	"syscall"
+	loc_metric "github.com/imaksimSuhinin/yandexSprintOne/internal/metrics"
+	os "github.com/imaksimSuhinin/yandexSprintOne/internal/os"
+	"net/http"
 	"time"
-	loc_metric "yandexSprintOne/internal/metrics"
 )
 
-func init() {
-	log.SetFlags(log.Lshortfile | log.LstdFlags)
-	closer.DebugSignalSet = []os.Signal{
-		syscall.SIGINT,
-		syscall.SIGQUIT,
-		syscall.SIGTERM,
-	}
-}
+const (
+	delayRefresh      time.Duration = 2
+	delayUpload       time.Duration = 10
+	httpClientTimeOut time.Duration = 10
+)
 
 func main() {
 
-	closer.Bind(Exit)
-	strtClient()
-
+	var metrics loc_metric.Metrics
+	go getRefresh(&metrics)
+	go startClient()
+	go getUpload(&metrics, startClient())
+	os.UpdateOsSignal()
 }
 
-func strtClient() {
-	client := resty.New()
-	var m loc_metric.Metrics
+func startClient() *http.Client {
+	client := &http.Client{
+		Timeout: httpClientTimeOut * time.Second,
+	}
 
-	refresh := time.NewTicker(2 * time.Second)
-	upload := time.NewTicker(10 * time.Second)
+	return client
+}
 
+func getUpload(m *loc_metric.Metrics, client *http.Client) {
+	upload := time.NewTicker(delayUpload * time.Second)
 	for {
-		<-refresh.C
-		var z = m.UpdateMetrics()
-
 		<-upload.C
-		z.PostMetrics(client)
-
+		m.PostMetrics(client)
 	}
 }
 
-func Exit() {
-	log.Println("Exit...")
-	os.Exit(0)
+func getRefresh(m *loc_metric.Metrics) {
+	refresh := time.NewTicker(delayRefresh * time.Second)
 
+	for {
+		<-refresh.C
+		m.UpdateMetrics()
+	}
 }

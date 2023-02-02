@@ -1,13 +1,25 @@
 package handlers
 
 import (
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi"
+	"github.com/imaksimSuhinin/yandexSprintOne/internal/converter"
+	"github.com/imaksimSuhinin/yandexSprintOne/internal/data"
+	"github.com/imaksimSuhinin/yandexSprintOne/internal/metrics"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
-	"yandexSprintOne/internal/converter"
-	"yandexSprintOne/internal/data"
+)
+
+const (
+	MetricType  string = "metricType"
+	MetricName  string = "metricName"
+	MetricValue string = "metricValue"
+)
+
+var (
+	metricMap       = make(map[string]metricValue)
+	lastCounterData int64
 )
 
 type metric struct {
@@ -19,34 +31,33 @@ type metricValue struct {
 	isCounter bool
 }
 
-var (
-	metricMap       = make(map[string]metricValue)
-	lastCounterData int64
-)
-
-func ShowMetrics(w http.ResponseWriter, r *http.Request) {
+func ShowMetrics(w http.ResponseWriter, r *http.Request, template *template.Template) {
 	var stringMetricMap metric
-	vars := mux.Vars(r)
+	vars := chi.URLParam
 	metricStringMap := make(map[string]metric)
 	for k, v := range metricMap {
 		if !v.isCounter {
-			stringMetricMap.mtype = "gauge"
-			stringMetricMap.value = vars["metricValue"]
+			stringMetricMap.mtype = metrics.MetricTypeGauge
+			stringMetricMap.value = vars(r, MetricValue)
 			metricStringMap[k] = stringMetricMap
 		} else {
-			stringMetricMap.mtype = "counter"
-			stringMetricMap.value = vars["metricValue"]
+			stringMetricMap.mtype = metrics.MetricTypeCounter
+			stringMetricMap.value = vars(r, MetricValue)
 			metricStringMap[k] = stringMetricMap
 		}
 
 	}
 	log.Println(stringMetricMap.value)
-	Templ, _ := template.ParseFiles("internal/html/index.html")
 	w.WriteHeader(http.StatusOK)
-	Templ.Execute(w, metricMap)
+	template.Execute(w, metricMap)
 }
 
-func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
+func ParseTemplate(path string) *template.Template {
+	Temple, _ := template.ParseFiles(path)
+	return Temple
+}
+
+func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataStorage) {
 	reqMethod := r.Method
 	if reqMethod != "POST" {
 		outputMessage := "Only POST method is alload"
@@ -56,10 +67,10 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 		return
 	}
 	var m metricValue
-	vars := mux.Vars(r)
-	switch vars["metricType"] {
-	case "gauge":
-		f, err := strconv.ParseFloat(vars["metricValue"], 64)
+	vars := chi.URLParam
+	switch vars(r, MetricType) {
+	case metrics.MetricTypeGauge:
+		f, err := strconv.ParseFloat(vars(r, MetricValue), 64)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
@@ -67,18 +78,18 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 		}
 		m.val = converter.Float64ToBytes(f)
 		m.isCounter = false
-		metricMap[vars["metricName"]] = m
+		metricMap[vars(r, MetricName)] = m
 
 		w.WriteHeader(http.StatusOK)
-		err = base.UpdateGaugeValue(vars["metricName"], f)
+		err = base.Data.UpdateGaugeValue(vars(r, MetricName), f)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Server error"))
 			return
 		}
 		r.Body.Close()
-	case "counter":
-		c, err := strconv.ParseInt(vars["metricValue"], 10, 64)
+	case metrics.MetricTypeCounter:
+		c, err := strconv.ParseInt(vars(r, MetricValue), 10, 64)
 		if err != nil {
 
 			w.WriteHeader(http.StatusBadRequest)
@@ -88,11 +99,11 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 		lastCounterData = lastCounterData + c // Change naming...
 		m.val = converter.Int64ToBytes(lastCounterData)
 		m.isCounter = true
-		metricMap[vars["metricName"]] = m
+		metricMap[vars(r, MetricName)] = m
 
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Ok"))
-		err = base.UpdateCounterValue(vars["metricName"], vars["metricValue"])
+		err = base.Data.UpdateCounterValue(vars(r, MetricName), vars(r, MetricValue))
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Server error"))
@@ -100,8 +111,8 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 		}
 		r.Body.Close()
 	default:
-		log.Println("Type", vars["metricType"], "wrong")
-		outputMessage := "Type " + vars["metricType"] + " not supported, only [counter/gauge]"
+		log.Println("Type", vars(r, MetricType), "wrong")
+		outputMessage := "Type " + vars(r, MetricType) + " not supported, only [counter/gauge]"
 		w.WriteHeader(http.StatusNotImplemented)
 		w.Write([]byte(outputMessage))
 
@@ -111,12 +122,12 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataBa
 
 }
 
-func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
-	vars := mux.Vars(r)
-	switch vars["metricType"] {
-	case "gauge":
-		name := vars["metricName"]
-		x, err := base.ReadValue(name)
+func ShowValue(w http.ResponseWriter, r *http.Request, base data.DataStorage) {
+	vars := chi.URLParam
+	switch vars(r, MetricType) {
+	case metrics.MetricTypeGauge:
+		name := vars(r, MetricName)
+		x, err := base.Data.ReadValue(name)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("Unknown statName"))
@@ -125,9 +136,9 @@ func ShowValue(w http.ResponseWriter, r *http.Request, base *data.DataBase) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(x))
 		r.Body.Close()
-	case "counter":
+	case metrics.MetricTypeCounter:
 
-		x, err := base.ReadValue(vars["metricName"])
+		x, err := base.Data.ReadValue(vars(r, MetricName))
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("Unknown statName"))
