@@ -32,7 +32,7 @@ func startClient() *http.Client {
 
 func getUpload(m *loc_metric.Metrics, client *http.Client) {
 	upload := time.NewTicker(delayUpload * time.Second)
-	for {
+	for true {
 		select {
 		case <-upload.C:
 			m.PostMetrics(client)
@@ -43,7 +43,7 @@ func getUpload(m *loc_metric.Metrics, client *http.Client) {
 func getRefresh(m *loc_metric.Metrics) {
 	refresh := time.NewTicker(delayRefresh * time.Second)
 
-	for {
+	for true {
 		select {
 		case <-refresh.C:
 			m.UpdateMetrics()

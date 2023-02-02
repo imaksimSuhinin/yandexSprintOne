@@ -99,7 +99,7 @@ func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 	var resp *http.Response
 
 	for field, val := range inInterface {
-		var uri, mkey, mtype, mval string
+		var mkey, mtype, mval string
 
 		if field != "PollCount" {
 			mtype = MetricTypeGauge
@@ -110,7 +110,7 @@ func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 			mval = strconv.FormatFloat(val, 'f', -1, 64)
 			mkey = field
 		}
-		fmt.Println(uri, mtype, mval)
+		//	fmt.Println(uri, mtype, mval)
 
 		var req, err = http.NewRequest("POST", "http://"+host+":"+port+"/update/"+mtype+"/"+mkey+"/"+mval, nil)
 
