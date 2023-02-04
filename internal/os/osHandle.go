@@ -3,7 +3,6 @@ package os
 import (
 	"fmt"
 	"os"
-	"os/signal"
 	"syscall"
 )
 
@@ -21,11 +20,7 @@ func HandleOsSignal(signal os.Signal) {
 }
 
 func UpdateOsSignal() {
-
-	signal.Notify(SigChanel)
-	exitChanel := make(chan int)
 	s := <-SigChanel
 	HandleOsSignal(s)
-	exitCode := <-exitChanel
-	os.Exit(exitCode)
+	os.Exit(0)
 }
