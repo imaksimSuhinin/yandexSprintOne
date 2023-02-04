@@ -38,13 +38,12 @@ func startServer(database data.DataStorage, template *template.Template) {
 			handlers.ShowValue(writer, request, database)
 		})
 
-	r.Route("/update", func(router chi.Router) {
+
 
 		r.MethodFunc(http.MethodPost, "/update/{metricType}/{metricName}/{metricValue}",
 			func(writer http.ResponseWriter, request *http.Request) {
 				handlers.PostMetricHandler(writer, request, &database)
 			})
-	})
 
 	httpServer := &http.Server{
 		Addr:    httpServerAddress,
