@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-type iData interface {
+type metricStorage interface {
 	Write(key, value string) error
 	Read(key string) string
 	ReadValue(key string) (string, error)
@@ -19,7 +19,7 @@ type DataBase struct {
 }
 
 type DataStorage struct {
-	Data iData
+	Data metricStorage
 }
 
 func NewDataBase() *DataBase {
