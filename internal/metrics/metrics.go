@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"runtime"
 	"strconv"
 	"time"
@@ -18,7 +19,8 @@ const (
 )
 
 const (
-	host             string = "127.0.0.1"
+	scheme 			 string ="http"
+	host   			 string = "127.0.0.1"
 	port             string = "8080"
 	contentTypeKey   string = "Content-Type"
 	contentTypeValue string = "text/plain"
@@ -110,10 +112,9 @@ func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 			mval = strconv.FormatFloat(val, 'f', -1, 64)
 			mkey = field
 		}
-		//	fmt.Println(uri, mtype, mval)
 
-		var req, err = http.NewRequest("POST", "http://"+host+":"+port+"/update/"+mtype+"/"+mkey+"/"+mval, nil)
-
+		url:=NewURLConnectionString(scheme,host+":"+port,"/update/"+mtype+"/"+mkey+"/"+mval)
+		var req, err = http.NewRequest(http.MethodPost, url, nil)
 		req.Header.Add(contentTypeKey, contentTypeValue) // добавляем заголовок Accept
 
 		resp, err = httpClient.Do(req)
@@ -121,7 +122,7 @@ func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 			fmt.Println(err)
 			defer resp.Body.Close()
 		}
-		if resp.StatusCode != 200 {
+		if resp.StatusCode != http.StatusOK {
 			return errors.New("HTTP Status != 200")
 		}
 	}
@@ -130,4 +131,17 @@ func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 	log.Println("Post...")
 
 	return nil
+}
+
+
+func NewURLConnectionString(proto, host, path string) string {
+	var v = make(url.Values)
+
+	var u = url.URL{
+		Scheme:   proto,
+		Host:     host,
+		Path:     path,
+		RawQuery: v.Encode(),
+	}
+	return u.String()
 }
