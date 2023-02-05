@@ -20,6 +20,8 @@ const (
 var (
 	metricMap       = make(map[string]metricValue)
 	lastCounterData int64
+	database = data.InitDatabase()
+
 )
 
 type metric struct {
@@ -57,7 +59,7 @@ func ParseTemplate(path string) *template.Template {
 	return Temple
 }
 
-func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataStorage) {
+func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 	reqMethod := r.Method
 	if reqMethod != "POST" {
 		outputMessage := "Only POST method is alload"
@@ -81,7 +83,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataSt
 		metricMap[vars(r, MetricName)] = m
 
 		w.WriteHeader(http.StatusOK)
-		err = base.Data.UpdateGaugeValue(vars(r, MetricName), f)
+		err = database.Data.UpdateGaugeValue(vars(r, MetricName), f)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Server error"))
@@ -103,7 +105,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataSt
 
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Ok"))
-		err = base.Data.UpdateCounterValue(vars(r, MetricName), vars(r, MetricValue))
+		err = database.Data.UpdateCounterValue(vars(r, MetricName), vars(r, MetricValue))
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Server error"))
@@ -122,12 +124,12 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request, base *data.DataSt
 
 }
 
-func ShowValue(w http.ResponseWriter, r *http.Request, base data.DataStorage) {
+func ShowValue(w http.ResponseWriter, r *http.Request) {
 	vars := chi.URLParam
 	switch vars(r, MetricType) {
 	case metrics.MetricTypeGauge:
 		name := vars(r, MetricName)
-		x, err := base.Data.ReadValue(name)
+		x, err := database.Data.ReadValue(name)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("Unknown statName"))
@@ -138,7 +140,7 @@ func ShowValue(w http.ResponseWriter, r *http.Request, base data.DataStorage) {
 		r.Body.Close()
 	case metrics.MetricTypeCounter:
 
-		x, err := base.Data.ReadValue(vars(r, MetricName))
+		x, err := database.Data.ReadValue(vars(r, MetricName))
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("Unknown statName"))
