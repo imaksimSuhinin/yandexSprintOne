@@ -10,7 +10,7 @@ import (
 const (
 	delayRefresh      time.Duration = 2
 	delayUpload       time.Duration = 10
-	httpClientTimeOut time.Duration = 20
+	httpClientTimeOut time.Duration = 30
 )
 
 func main() {
