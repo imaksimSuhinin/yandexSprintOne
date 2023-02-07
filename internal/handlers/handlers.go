@@ -170,7 +170,6 @@ func PostJSONMetricHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&requestMetric)
 	if err != nil {
-
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -237,6 +236,9 @@ func ShowJSONValue(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Server error", http.StatusInternalServerError)
 			return
 		}
+	default:
+		w.WriteHeader(http.StatusNotImplemented)
+		r.Body.Close()
 	}
 
 	w.Header().Set("Content-Type", "application/json")
