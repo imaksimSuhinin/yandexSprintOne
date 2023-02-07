@@ -91,7 +91,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 		metricMap[vars(r, MetricName)] = m
 
 		w.WriteHeader(http.StatusOK)
-		err = database.Data.UpdateGaugeValue(vars(r, MetricName), &f)
+		err = database.Data.UpdateGaugeValue(vars(r, MetricName), f)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Server error"))
@@ -114,7 +114,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Ok"))
 		z := vars(r, MetricValue)
-		err = database.Data.UpdateCounterValue(vars(r, MetricName), &z)
+		err = database.Data.UpdateCounterValue(vars(r, MetricName), z)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Server error"))
@@ -167,18 +167,18 @@ func ShowValue(w http.ResponseWriter, r *http.Request) {
 }
 
 func PostJsonMetricHandler(w http.ResponseWriter, r *http.Request) {
-	var locMetric Metrics
+	var requestMetric Metrics
 
-	err := json.NewDecoder(r.Body).Decode(&locMetric)
+	err := json.NewDecoder(r.Body).Decode(&requestMetric)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	switch locMetric.MType {
+	switch requestMetric.MType {
 	case metrics.MetricTypeGauge:
 		w.WriteHeader(http.StatusOK)
-		err = database.Data.UpdateGaugeValue(locMetric.ID, locMetric.Value)
+		err = database.Data.UpdateGaugeValue(requestMetric.ID, *requestMetric.Value)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Server error"))
@@ -186,23 +186,27 @@ func PostJsonMetricHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		r.Body.Close()
 	case metrics.MetricTypeCounter:
-		c := math.Round(*locMetric.Value)
+		c := math.Round(*requestMetric.Value)
 		lastCounterData = lastCounterData + int64(c)
 
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Ok"))
 		str := string(lastCounterData)
-		err = database.Data.UpdateCounterValue(locMetric.ID, &str)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Server error"))
-			return
-		}
+		err = database.Data.UpdateCounterValue(requestMetric.ID, str)
+
 		r.Body.Close()
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
 		r.Body.Close()
 	}
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Server error"))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Ok"))
 
 }
 
@@ -224,7 +228,7 @@ func ShowJsonValue(w http.ResponseWriter, r *http.Request) {
 	}
 	switch responseJson.MType {
 	case metrics.MetricTypeGauge:
-		v, err := strconv.ParseFloat(getValue, 64);
+		v, err := strconv.ParseFloat(getValue, 64)
 		if err != nil {
 		}
 		responseJson.Value = &v
