@@ -3,6 +3,7 @@ package converter
 import (
 	"encoding/binary"
 	"math"
+	"strconv"
 )
 
 func Int64ToBytes(value int64) [8]byte {
@@ -16,4 +17,7 @@ func Float64ToBytes(value float64) [8]byte {
 	var bytes [8]byte
 	binary.LittleEndian.PutUint64(bytes[:], bits)
 	return bytes
+}
+func FloatToString(value float64) string {
+	return strconv.FormatFloat(value, 'g', 1, 64)
 }

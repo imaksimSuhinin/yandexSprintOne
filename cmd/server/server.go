@@ -21,15 +21,19 @@ var (
 )
 
 func main() {
-	go startServer( getTemplate)
+	go startServer(getTemplate)
 	os.UpdateOsSignal()
 }
 
-func startServer( template *template.Template) {
+func startServer(template *template.Template) {
 	r := chi.NewRouter()
 
 	r.MethodFunc(http.MethodGet, "/", func(writer http.ResponseWriter, request *http.Request) {
 		handlers.ShowMetrics(writer, request, template)
+	})
+
+	r.MethodFunc(http.MethodGet, "/", func(writer http.ResponseWriter, request *http.Request) {
+		handlers.ShowJsonValue(writer, request)
 	})
 
 	r.MethodFunc(http.MethodGet, "/value/{metricType}/{metricName}",
@@ -37,12 +41,17 @@ func startServer( template *template.Template) {
 			handlers.ShowValue(writer, request)
 		})
 
+	r.Route("/update/", func(router chi.Router) {
+		//json handler
+		r.Post("/", func(writer http.ResponseWriter, request *http.Request) {
+			handlers.PostJsonMetricHandler(writer, request)
+		})
 
-
-		r.MethodFunc(http.MethodPost, "/update/{metricType}/{metricName}/{metricValue}",
+		r.Post("/update/{metricType}/{metricName}/{metricValue}",
 			func(writer http.ResponseWriter, request *http.Request) {
 				handlers.PostMetricHandler(writer, request)
 			})
+	})
 
 	httpServer := &http.Server{
 		Addr:    httpServerAddress,

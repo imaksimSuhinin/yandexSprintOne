@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"encoding/json"
 	"github.com/go-chi/chi"
 	"github.com/imaksimSuhinin/yandexSprintOne/internal/converter"
 	"github.com/imaksimSuhinin/yandexSprintOne/internal/data"
 	"github.com/imaksimSuhinin/yandexSprintOne/internal/metrics"
 	"html/template"
 	"log"
+	"math"
 	"net/http"
 	"strconv"
 )
@@ -20,9 +22,15 @@ const (
 var (
 	metricMap       = make(map[string]metricValue)
 	lastCounterData int64
-	database = data.InitDatabase()
-
+	database        = data.InitDatabase()
 )
+
+type Metrics struct {
+	ID    string   `json:"id"`              // имя метрики
+	MType string   `json:"type"`            // параметр, принимающий значение gauge или counter
+	Delta *int64   `json:"delta,omitempty"` // значение метрики в случае передачи counter
+	Value *float64 `json:"value,omitempty"` // значение метрики в случае передачи gauge
+}
 
 type metric struct {
 	mtype, value string
@@ -83,7 +91,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 		metricMap[vars(r, MetricName)] = m
 
 		w.WriteHeader(http.StatusOK)
-		err = database.Data.UpdateGaugeValue(vars(r, MetricName), f)
+		err = database.Data.UpdateGaugeValue(vars(r, MetricName), &f)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Server error"))
@@ -105,7 +113,8 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Ok"))
-		err = database.Data.UpdateCounterValue(vars(r, MetricName), vars(r, MetricValue))
+		z := vars(r, MetricValue)
+		err = database.Data.UpdateCounterValue(vars(r, MetricName), &z)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Server error"))
@@ -154,5 +163,85 @@ func ShowValue(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("Unknown statName"))
 		r.Body.Close()
+	}
+}
+
+func PostJsonMetricHandler(w http.ResponseWriter, r *http.Request) {
+	var locMetric Metrics
+
+	err := json.NewDecoder(r.Body).Decode(&locMetric)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	switch locMetric.MType {
+	case metrics.MetricTypeGauge:
+		w.WriteHeader(http.StatusOK)
+		err = database.Data.UpdateGaugeValue(locMetric.ID, locMetric.Value)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Server error"))
+			return
+		}
+		r.Body.Close()
+	case metrics.MetricTypeCounter:
+		c := math.Round(*locMetric.Value)
+		lastCounterData = lastCounterData + int64(c)
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Ok"))
+		str := string(lastCounterData)
+		err = database.Data.UpdateCounterValue(locMetric.ID, &str)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Server error"))
+			return
+		}
+		r.Body.Close()
+	default:
+		w.WriteHeader(http.StatusNotImplemented)
+		r.Body.Close()
+	}
+
+}
+
+func ShowJsonValue(w http.ResponseWriter, r *http.Request) {
+	var requestJson struct {
+		ID   string `json:"id"`
+		Type string `json:"type"`
+	}
+	err := json.NewDecoder(r.Body).Decode(&requestJson)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	getValue, err := database.Data.ReadValue(requestJson.ID)
+
+	responseJson := Metrics{
+		ID:    requestJson.ID,
+		MType: requestJson.Type,
+	}
+	switch responseJson.MType {
+	case metrics.MetricTypeGauge:
+		v, err := strconv.ParseFloat(getValue, 64);
+		if err != nil {
+		}
+		responseJson.Value = &v
+	case metrics.MetricTypeCounter:
+		var counterVal int64
+		counterVal, err = strconv.ParseInt(getValue, 1, 64)
+		responseJson.Delta = &counterVal
+	}
+	if err != nil {
+		http.Error(w, "Server error", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	err = json.NewEncoder(w).Encode(responseJson)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 }

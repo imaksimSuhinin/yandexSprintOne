@@ -10,8 +10,8 @@ type metricStorage interface {
 	Write(key, value string) error
 	Read(key string) string
 	ReadValue(key string) (string, error)
-	UpdateGaugeValue(key string, value float64) error
-	UpdateCounterValue(key string, value string) error
+	UpdateGaugeValue(key string, value *float64) error
+	UpdateCounterValue(key string, value *string) error
 }
 
 type DataBase struct {
@@ -82,17 +82,17 @@ func (m DataBase) Read(key string) string {
 	return value
 }
 
-func (m DataBase) UpdateGaugeValue(key string, value float64) error {
+func (m DataBase) UpdateGaugeValue(key string, value *float64) error {
 	return m.Write(key, fmt.Sprintf("%v", value))
 }
 
-func (m DataBase) UpdateCounterValue(key string, value string) error {
+func (m DataBase) UpdateCounterValue(key string, value *string) error {
 	prevVal := m.Read(key)
 	prevValInt, err := strconv.ParseInt(prevVal, 10, 64)
 	if err != nil {
 		return errors.New(" value is not int64")
 	}
-	lastValInt, err := strconv.ParseInt(value, 10, 64)
+	lastValInt, err := strconv.ParseInt(*value, 10, 64)
 	if err != nil {
 		return errors.New(" value is not int64")
 	}
