@@ -238,7 +238,7 @@ func ShowJSONValue(w http.ResponseWriter, r *http.Request) {
 		}
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
-		r.Body.Close()
+
 	}
 
 	w.Header().Set("Content-Type", "application/json")
