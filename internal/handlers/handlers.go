@@ -8,7 +8,6 @@ import (
 	"github.com/imaksimSuhinin/yandexSprintOne/internal/metrics"
 	"html/template"
 	"log"
-	"math"
 	"net/http"
 	"strconv"
 )
@@ -166,11 +165,12 @@ func ShowValue(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func PostJsonMetricHandler(w http.ResponseWriter, r *http.Request) {
+func PostJSONMetricHandler(w http.ResponseWriter, r *http.Request) {
 	var requestMetric Metrics
 
 	err := json.NewDecoder(r.Body).Decode(&requestMetric)
 	if err != nil {
+
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -179,22 +179,13 @@ func PostJsonMetricHandler(w http.ResponseWriter, r *http.Request) {
 	case metrics.MetricTypeGauge:
 		w.WriteHeader(http.StatusOK)
 		err = database.Data.UpdateGaugeValue(requestMetric.ID, *requestMetric.Value)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Server error"))
-			return
-		}
-		r.Body.Close()
-	case metrics.MetricTypeCounter:
-		c := math.Round(*requestMetric.Value)
-		lastCounterData = lastCounterData + int64(c)
 
+	case metrics.MetricTypeCounter:
+		countValue := converter.Int64ToString(*requestMetric.Delta)
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Ok"))
-		str := string(lastCounterData)
-		err = database.Data.UpdateCounterValue(requestMetric.ID, str)
+		err = database.Data.UpdateCounterValue(requestMetric.ID, countValue)
 
-		r.Body.Close()
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
 		r.Body.Close()
@@ -210,40 +201,47 @@ func PostJsonMetricHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func ShowJsonValue(w http.ResponseWriter, r *http.Request) {
-	var requestJson struct {
+func ShowJSONValue(w http.ResponseWriter, r *http.Request) {
+	var requestJSON struct {
 		ID   string `json:"id"`
 		Type string `json:"type"`
 	}
-	err := json.NewDecoder(r.Body).Decode(&requestJson)
+	err := json.NewDecoder(r.Body).Decode(&requestJSON)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	getValue, err := database.Data.ReadValue(requestJson.ID)
-
-	responseJson := Metrics{
-		ID:    requestJson.ID,
-		MType: requestJson.Type,
-	}
-	switch responseJson.MType {
-	case metrics.MetricTypeGauge:
-		v, err := strconv.ParseFloat(getValue, 64)
-		if err != nil {
-		}
-		responseJson.Value = &v
-	case metrics.MetricTypeCounter:
-		var counterVal int64
-		counterVal, err = strconv.ParseInt(getValue, 1, 64)
-		responseJson.Delta = &counterVal
-	}
+	getValue, err := database.Data.ReadValue(requestJSON.ID)
 	if err != nil {
 		http.Error(w, "Server error", http.StatusInternalServerError)
 		return
 	}
+
+	responseJSON := Metrics{
+		ID:    requestJSON.ID,
+		MType: requestJSON.Type,
+	}
+	switch responseJSON.MType {
+	case metrics.MetricTypeGauge:
+		v, err := strconv.ParseFloat(getValue, 64)
+		if err != nil {
+			http.Error(w, "Server error", http.StatusInternalServerError)
+			return
+		}
+		responseJSON.Value = &v
+	case metrics.MetricTypeCounter:
+		var counterVal int64
+		counterVal, err = strconv.ParseInt(getValue, 10, 64)
+		responseJSON.Delta = &counterVal
+		if err != nil {
+			http.Error(w, "Server error", http.StatusInternalServerError)
+			return
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(w).Encode(responseJson)
+	err = json.NewEncoder(w).Encode(responseJSON)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

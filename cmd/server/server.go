@@ -33,7 +33,7 @@ func startServer(template *template.Template) {
 	})
 
 	r.MethodFunc(http.MethodPost, "/", func(writer http.ResponseWriter, request *http.Request) {
-		handlers.ShowJsonValue(writer, request)
+		handlers.ShowJSONValue(writer, request)
 	})
 
 	r.MethodFunc(http.MethodGet, "/value/{metricType}/{metricName}",
@@ -44,7 +44,7 @@ func startServer(template *template.Template) {
 	r.Route("/update/", func(router chi.Router) {
 		//json handler
 		r.Post("/", func(writer http.ResponseWriter, request *http.Request) {
-			handlers.PostJsonMetricHandler(writer, request)
+			handlers.PostJSONMetricHandler(writer, request)
 		})
 
 		r.Post("/update/{metricType}/{metricName}/{metricValue}",
