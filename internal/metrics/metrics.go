@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -114,7 +115,7 @@ func (m *Metrics) UpdateMetrics() *Metrics {
 //				mkey = field
 //			}
 //
-//			url:=NewURLConnectionString(scheme,host+":"+port,"/update/"+mtype+"/"+mkey+"/"+mval)
+//			url := NewURLConnectionString(scheme, host+":"+port, "/update/"+mtype+"/"+mkey+"/"+mval)
 //			var req, err = http.NewRequest(http.MethodPost, url, nil)
 //			req.Header.Add(contentTypeKey, contentTypeValue) // добавляем заголовок Accept
 //
@@ -133,7 +134,7 @@ func (m *Metrics) UpdateMetrics() *Metrics {
 //
 //		return nil
 //	}
-func (m *Metrics) PostMetrics(httpClient *http.Client) error {
+func (m *Metrics) PostMetricsJSON(httpClient *http.Client) error {
 
 	OneMetrics := struct {
 		ID    string  `json:"id"`
@@ -156,25 +157,31 @@ func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 			mval = strconv.FormatFloat(val, 'f', -1, 64)
 			mkey = field
 			OneMetrics.MType = mtype
+			OneMetrics.ID = mval
+
 			OneMetrics.Value, _ = strconv.ParseFloat(mval, 64)
+			//log.Println("PollCount:" + string(OneMetrics.MType))
+
 		} else {
 			mtype = MetricTypeCounter
 			mval = strconv.FormatFloat(val, 'f', -1, 64)
 			mkey = field
 			OneMetrics.MType = mtype
+			OneMetrics.ID = mkey
 			OneMetrics.Delta, _ = strconv.ParseInt(mval, 10, 64)
 		}
+		log.Println("PollCount:" + string(OneMetrics.Delta))
 
-		//	statJSON, _ := json.Marshal(OneMetrics)
-		fmt.Println(mkey)
-		url := NewURLConnectionString(scheme, host+":"+port, "/update/"+OneMetrics.MType+"/"+OneMetrics.ID)
-		var req, err = http.NewRequest(http.MethodPost, url, nil)
+		statJSON, _ := json.Marshal(OneMetrics)
+		//fmt.Println(mkey)
+		url := NewURLConnectionString(scheme, host+":"+port, "/update/")
+		var req, err = http.NewRequest(http.MethodPost, url, bytes.NewBuffer(statJSON))
 		req.Header.Add(contentTypeKey, contentTypeJSON) // добавляем заголовок Accept
-
+		log.Println(statJSON)
 		resp, err = httpClient.Do(req)
 		if err != nil {
 			fmt.Println(err)
-			defer resp.Body.Close()
+
 		}
 		if resp.StatusCode != http.StatusOK {
 			return errors.New("HTTP Status != 200")

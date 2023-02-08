@@ -32,7 +32,7 @@ func startServer(template *template.Template) {
 		handlers.ShowMetrics(writer, request, template)
 	})
 
-	r.MethodFunc(http.MethodPost, "/", func(writer http.ResponseWriter, request *http.Request) {
+	r.MethodFunc(http.MethodPost, "/value/", func(writer http.ResponseWriter, request *http.Request) {
 		handlers.ShowJSONValue(writer, request)
 	})
 

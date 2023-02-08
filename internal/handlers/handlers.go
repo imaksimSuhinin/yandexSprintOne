@@ -212,7 +212,7 @@ func ShowJSONValue(w http.ResponseWriter, r *http.Request) {
 	}
 	getValue, err := database.Data.ReadValue(requestJSON.ID)
 	if err != nil {
-		http.Error(w, "Server error", http.StatusInternalServerError)
+		http.Error(w, "Server error", http.StatusNotFound)
 		return
 	}
 
@@ -237,7 +237,7 @@ func ShowJSONValue(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	default:
-		w.WriteHeader(http.StatusNotImplemented)
+		w.WriteHeader(http.StatusInternalServerError)
 
 	}
 
