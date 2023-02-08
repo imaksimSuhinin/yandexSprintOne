@@ -19,11 +19,12 @@ const (
 )
 
 const (
-	scheme 			 string ="http"
-	host   			 string = "127.0.0.1"
-	port             string = "8080"
-	contentTypeKey   string = "Content-Type"
-	contentTypeValue string = "text/plain"
+	scheme          string = "http"
+	host            string = "127.0.0.1"
+	port            string = "8080"
+	contentTypeKey  string = "Content-Type"
+	contentTypeText string = "text/plain"
+	contentTypeJSON string = "application/json"
 )
 
 type gauge float64
@@ -92,7 +93,54 @@ func (m *Metrics) UpdateMetrics() *Metrics {
 	return m
 }
 
+// func (m *Metrics) PostMetrics(httpClient *http.Client) error {
+//
+//		b, _ := json.Marshal(&m)
+//		var inInterface map[string]float64
+//		json.Unmarshal(b, &inInterface)
+//
+//		var resp *http.Response
+//
+//		for field, val := range inInterface {
+//			var mkey, mtype, mval string
+//
+//			if field != "PollCount" {
+//				mtype = MetricTypeGauge
+//				mval = strconv.FormatFloat(val, 'f', -1, 64)
+//				mkey = field
+//			} else {
+//				mtype = MetricTypeCounter
+//				mval = strconv.FormatFloat(val, 'f', -1, 64)
+//				mkey = field
+//			}
+//
+//			url:=NewURLConnectionString(scheme,host+":"+port,"/update/"+mtype+"/"+mkey+"/"+mval)
+//			var req, err = http.NewRequest(http.MethodPost, url, nil)
+//			req.Header.Add(contentTypeKey, contentTypeValue) // добавляем заголовок Accept
+//
+//			resp, err = httpClient.Do(req)
+//			if err != nil {
+//				fmt.Println(err)
+//				defer resp.Body.Close()
+//			}
+//			if resp.StatusCode != http.StatusOK {
+//				return errors.New("HTTP Status != 200")
+//			}
+//		}
+//		defer resp.Body.Close()
+//
+//		log.Println("Post...")
+//
+//		return nil
+//	}
 func (m *Metrics) PostMetrics(httpClient *http.Client) error {
+
+	OneMetrics := struct {
+		ID    string  `json:"id"`
+		MType string  `json:"type"`
+		Delta int64   `json:"delta"`
+		Value float64 `json:"value"`
+	}{}
 
 	b, _ := json.Marshal(&m)
 	var inInterface map[string]float64
@@ -107,15 +155,21 @@ func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 			mtype = MetricTypeGauge
 			mval = strconv.FormatFloat(val, 'f', -1, 64)
 			mkey = field
+			OneMetrics.MType = mtype
+			OneMetrics.Value, _ = strconv.ParseFloat(mval, 64)
 		} else {
 			mtype = MetricTypeCounter
 			mval = strconv.FormatFloat(val, 'f', -1, 64)
 			mkey = field
+			OneMetrics.MType = mtype
+			OneMetrics.Delta, _ = strconv.ParseInt(mval, 10, 64)
 		}
 
-		url:=NewURLConnectionString(scheme,host+":"+port,"/update/"+mtype+"/"+mkey+"/"+mval)
+		//	statJSON, _ := json.Marshal(OneMetrics)
+		fmt.Println(mkey)
+		url := NewURLConnectionString(scheme, host+":"+port, "/update/"+OneMetrics.MType+"/"+OneMetrics.ID)
 		var req, err = http.NewRequest(http.MethodPost, url, nil)
-		req.Header.Add(contentTypeKey, contentTypeValue) // добавляем заголовок Accept
+		req.Header.Add(contentTypeKey, contentTypeJSON) // добавляем заголовок Accept
 
 		resp, err = httpClient.Do(req)
 		if err != nil {
@@ -132,7 +186,6 @@ func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 
 	return nil
 }
-
 
 func NewURLConnectionString(proto, host, path string) string {
 	var v = make(url.Values)
