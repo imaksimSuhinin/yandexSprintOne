@@ -173,7 +173,7 @@ func (m *Metrics) PostMetricsJSON(httpClient *http.Client) error {
 		log.Println("PollCount:" + string(OneMetrics.Delta))
 
 		statJSON, _ := json.Marshal(OneMetrics)
-		//fmt.Println(mkey)
+		fmt.Println(mkey)
 		url := NewURLConnectionString(scheme, host+":"+port, "/update/")
 		var req, err = http.NewRequest(http.MethodPost, url, bytes.NewBuffer(statJSON))
 		req.Header.Add(contentTypeKey, contentTypeJSON) // добавляем заголовок Accept
@@ -181,7 +181,7 @@ func (m *Metrics) PostMetricsJSON(httpClient *http.Client) error {
 		resp, err = httpClient.Do(req)
 		if err != nil {
 			fmt.Println(err)
-
+			resp.Body.Close()
 		}
 		if resp.StatusCode != http.StatusOK {
 			return errors.New("HTTP Status != 200")
