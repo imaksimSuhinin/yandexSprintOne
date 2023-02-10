@@ -94,46 +94,46 @@ func (m *Metrics) UpdateMetrics() *Metrics {
 	return m
 }
 
-// func (m *Metrics) PostMetrics(httpClient *http.Client) error {
-//
-//		b, _ := json.Marshal(&m)
-//		var inInterface map[string]float64
-//		json.Unmarshal(b, &inInterface)
-//
-//		var resp *http.Response
-//
-//		for field, val := range inInterface {
-//			var mkey, mtype, mval string
-//
-//			if field != "PollCount" {
-//				mtype = MetricTypeGauge
-//				mval = strconv.FormatFloat(val, 'f', -1, 64)
-//				mkey = field
-//			} else {
-//				mtype = MetricTypeCounter
-//				mval = strconv.FormatFloat(val, 'f', -1, 64)
-//				mkey = field
-//			}
-//
-//			url := NewURLConnectionString(scheme, host+":"+port, "/update/"+mtype+"/"+mkey+"/"+mval)
-//			var req, err = http.NewRequest(http.MethodPost, url, nil)
-//			req.Header.Add(contentTypeKey, contentTypeValue) // добавляем заголовок Accept
-//
-//			resp, err = httpClient.Do(req)
-//			if err != nil {
-//				fmt.Println(err)
-//				defer resp.Body.Close()
-//			}
-//			if resp.StatusCode != http.StatusOK {
-//				return errors.New("HTTP Status != 200")
-//			}
-//		}
-//		defer resp.Body.Close()
-//
-//		log.Println("Post...")
-//
-//		return nil
-//	}
+func (m *Metrics) PostMetrics(httpClient *http.Client) error {
+
+	b, _ := json.Marshal(&m)
+	var inInterface map[string]float64
+	json.Unmarshal(b, &inInterface)
+
+	var resp *http.Response
+
+	for field, val := range inInterface {
+		var mkey, mtype, mval string
+
+		if field != "PollCount" {
+			mtype = MetricTypeGauge
+			mval = strconv.FormatFloat(val, 'f', -1, 64)
+			mkey = field
+		} else {
+			mtype = MetricTypeCounter
+			mval = strconv.FormatFloat(val, 'f', -1, 64)
+			mkey = field
+		}
+
+		url := NewURLConnectionString(scheme, host+":"+port, "/update/"+mtype+"/"+mkey+"/"+mval)
+		var req, err = http.NewRequest(http.MethodPost, url, nil)
+		req.Header.Add(contentTypeKey, contentTypeText) // добавляем заголовок Accept
+
+		resp, err = httpClient.Do(req)
+		if err != nil {
+			fmt.Println(err)
+			defer resp.Body.Close()
+		}
+		if resp.StatusCode != http.StatusOK {
+			return errors.New("HTTP Status != 200")
+		}
+	}
+	defer resp.Body.Close()
+
+	log.Println("Post...")
+
+	return nil
+}
 func (m *Metrics) PostMetricsJSON(httpClient *http.Client) error {
 
 	OneMetrics := struct {

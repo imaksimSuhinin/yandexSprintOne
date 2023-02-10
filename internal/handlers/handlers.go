@@ -44,6 +44,7 @@ func ShowMetrics(w http.ResponseWriter, r *http.Request, template *template.Temp
 	var stringMetricMap metric
 	vars := chi.URLParam
 	metricStringMap := make(map[string]metric)
+
 	for k, v := range metricMap {
 		if !v.isCounter {
 			stringMetricMap.mtype = metrics.MetricTypeGauge
@@ -53,10 +54,10 @@ func ShowMetrics(w http.ResponseWriter, r *http.Request, template *template.Temp
 			stringMetricMap.mtype = metrics.MetricTypeCounter
 			stringMetricMap.value = vars(r, MetricValue)
 			metricStringMap[k] = stringMetricMap
+			log.Println("here" + string(vars(r, MetricValue)))
 		}
 
 	}
-	log.Println(stringMetricMap.value)
 	w.WriteHeader(http.StatusOK)
 	template.Execute(w, metricMap)
 }
@@ -77,6 +78,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var m metricValue
 	vars := chi.URLParam
+	log.Println("here" + string(vars(r, MetricValue)))
 	switch vars(r, MetricType) {
 	case metrics.MetricTypeGauge:
 		f, err := strconv.ParseFloat(vars(r, MetricValue), 64)
@@ -194,7 +196,7 @@ func PostJSONMetricHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Server error"))
 		return
 	}
-
+	log.Println("request" + requestMetric.ID)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Ok"))
 
@@ -202,8 +204,8 @@ func PostJSONMetricHandler(w http.ResponseWriter, r *http.Request) {
 
 func ShowJSONValue(w http.ResponseWriter, r *http.Request) {
 	var requestJSON struct {
-		ID   string `json:"id"`
-		Type string `json:"type"`
+		ID   string `json:"id" valid:"required"`
+		Type string `json:"type" valid:"required,in(counter|gauge)"`
 	}
 	err := json.NewDecoder(r.Body).Decode(&requestJSON)
 	if err != nil {
@@ -244,6 +246,7 @@ func ShowJSONValue(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(responseJSON)
+	//fmt.Println("response:" + responseJSON.Delta + "")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

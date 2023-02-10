@@ -24,8 +24,8 @@ func main() {
 	for {
 		select {
 		case <-upload.C:
-			metrics.UpdateMetrics()
 			metrics.PostMetricsJSON(client)
+			metrics.PostMetrics(client)
 		case <-refresh.C:
 			metrics.UpdateMetrics()
 		case <-os.SigChanel:
