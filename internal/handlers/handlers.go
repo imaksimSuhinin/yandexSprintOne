@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/asaskevich/govalidator"
 	"github.com/go-chi/chi"
 	"github.com/imaksimSuhinin/yandexSprintOne/internal/converter"
@@ -197,7 +198,7 @@ func PostJSONMetricHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Server error"))
 		return
 	}
-	log.Println("request" + requestMetric.ID)
+	//log.Println("request" + requestMetric.ID)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Ok"))
 
@@ -254,7 +255,7 @@ func ShowJSONValue(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(responseJSON)
-	//fmt.Println("response:" + responseJSON.Delta + "")
+	fmt.Println("response:" + responseJSON.MType)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
