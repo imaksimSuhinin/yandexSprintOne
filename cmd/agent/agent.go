@@ -24,10 +24,10 @@ func main() {
 	for {
 		select {
 		case <-upload.C:
-			metrics.UpdateMetrics()
+			metrics.PostMetricsJSON(client)
 			//metrics.PostMetrics(client)
 		case <-refresh.C:
-			metrics.PostMetricsJSON(client)
+			metrics.UpdateMetrics()
 		case <-os.SigChanel:
 			os.UpdateOsSignal()
 		}
