@@ -45,7 +45,7 @@ func startServer(template *template.Template) {
 		func(writer http.ResponseWriter, request *http.Request) {
 			handlers.PostMetricHandler(writer, request)
 		})
-	
+
 	httpServer := &http.Server{
 		Addr:    httpServerAddress,
 		Handler: r,

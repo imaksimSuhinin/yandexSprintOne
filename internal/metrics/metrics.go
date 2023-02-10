@@ -170,7 +170,7 @@ func (m *Metrics) PostMetricsJSON(httpClient *http.Client) error {
 			OneMetrics.ID = mkey
 			OneMetrics.Delta, _ = strconv.ParseInt(mval, 10, 64)
 		}
-		log.Println("PollCount:" + string(OneMetrics.Delta))
+		//	log.Println("PollCount:" + string(OneMetrics.Delta))
 
 		statJSON, _ := json.Marshal(OneMetrics)
 		fmt.Println(mkey)
