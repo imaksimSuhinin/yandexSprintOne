@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"github.com/asaskevich/govalidator"
 	"github.com/go-chi/chi"
 	"github.com/imaksimSuhinin/yandexSprintOne/internal/converter"
 	"github.com/imaksimSuhinin/yandexSprintOne/internal/data"
@@ -204,14 +205,21 @@ func PostJSONMetricHandler(w http.ResponseWriter, r *http.Request) {
 
 func ShowJSONValue(w http.ResponseWriter, r *http.Request) {
 	var requestJSON struct {
-		ID   string `json:"id" valid:"required"`
-		Type string `json:"type" valid:"required,in(counter|gauge)"`
+		ID    string `json:"id" valid:"required"`
+		MType string `json:"type" valid:"required,in(counter|gauge)"`
 	}
 	err := json.NewDecoder(r.Body).Decode(&requestJSON)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	_, err = govalidator.ValidateStruct(requestJSON)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	getValue, err := database.Data.ReadValue(requestJSON.ID)
 	if err != nil {
 		http.Error(w, "Server error", http.StatusNotFound)
@@ -220,7 +228,7 @@ func ShowJSONValue(w http.ResponseWriter, r *http.Request) {
 
 	responseJSON := Metrics{
 		ID:    requestJSON.ID,
-		MType: requestJSON.Type,
+		MType: requestJSON.MType,
 	}
 	switch responseJSON.MType {
 	case metrics.MetricTypeGauge:

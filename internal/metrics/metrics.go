@@ -189,7 +189,7 @@ func (m *Metrics) PostMetricsJSON(httpClient *http.Client) error {
 	}
 	defer resp.Body.Close()
 
-	log.Println("Post...")
+	log.Println("PostJSON...")
 
 	return nil
 }
