@@ -21,6 +21,3 @@ func Float64ToBytes(value float64) [8]byte {
 func FloatToString(value float64) string {
 	return strconv.FormatFloat(value, 'g', 1, 64)
 }
-func Int64ToString(value int64) string {
-	return strconv.FormatInt(value, 64)
-}
