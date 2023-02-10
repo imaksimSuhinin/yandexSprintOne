@@ -178,30 +178,47 @@ func PostJSONMetricHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	switch requestMetric.MType {
-	case metrics.MetricTypeGauge:
-		w.WriteHeader(http.StatusOK)
+	if requestMetric.MType == "counter" {
+		if requestMetric.Delta == nil {
+			http.Error(w, "delta is empty", http.StatusBadRequest)
+			return
+		}
+		countValue := converter.Int64ToString(*requestMetric.Delta)
+		err = database.Data.UpdateCounterValue(requestMetric.ID, countValue)
+	}
+
+	if requestMetric.MType == "gauge" {
+		if requestMetric.Value == nil {
+			http.Error(w, "value is empty", http.StatusBadRequest)
+			return
+		}
 		err = database.Data.UpdateGaugeValue(requestMetric.ID, *requestMetric.Value)
 
-	case metrics.MetricTypeCounter:
-		countValue := converter.Int64ToString(*requestMetric.Delta)
+		//	switch requestMetric.MType {
+		//case metrics.MetricTypeGauge:
+		//	w.WriteHeader(http.StatusOK)
+		//	err = database.Data.UpdateGaugeValue(requestMetric.ID, *requestMetric.Value)
+		//
+		//case metrics.MetricTypeCounter:
+		//	countValue := converter.Int64ToString(*requestMetric.Delta)
+		//	w.WriteHeader(http.StatusOK)
+		//	w.Write([]byte("Ok"))
+		//	err = database.Data.UpdateCounterValue(requestMetric.ID, countValue)
+		//
+		//default:
+		//	w.WriteHeader(http.StatusNotImplemented)
+		//	r.Body.Close()
+		//}
+		//if err != nil {
+		//	w.WriteHeader(http.StatusInternalServerError)
+		//	w.Write([]byte("Server error"))
+		//	return
+		//}
+		//log.Println("request" + requestMetric.ID)
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Ok"))
-		err = database.Data.UpdateCounterValue(requestMetric.ID, countValue)
 
-	default:
-		w.WriteHeader(http.StatusNotImplemented)
-		r.Body.Close()
 	}
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Server error"))
-		return
-	}
-	//log.Println("request" + requestMetric.ID)
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Ok"))
-
 }
 
 func ShowJSONValue(w http.ResponseWriter, r *http.Request) {
