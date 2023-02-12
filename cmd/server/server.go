@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/imaksimSuhinin/yandexSprintOne/internal/config"
 	"github.com/imaksimSuhinin/yandexSprintOne/internal/data"
 	"github.com/imaksimSuhinin/yandexSprintOne/internal/handlers"
 	os "github.com/imaksimSuhinin/yandexSprintOne/internal/os"
@@ -12,7 +13,9 @@ import (
 )
 
 const (
-	httpServerAddress string = ":8080"
+//ServerAddr string = "127.0.0.1:8080"
+
+// httpServerAddress string = ":8080"
 )
 
 var (
@@ -56,7 +59,7 @@ func startServer(template *template.Template) {
 		})
 
 	httpServer := &http.Server{
-		Addr:    httpServerAddress,
+		Addr:    config.AppConfig.ServerAddr,
 		Handler: r,
 	}
 

@@ -198,6 +198,7 @@ func PostJSONMetricHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		err = database.Data.UpdateGaugeValue(requestMetric.ID, *requestMetric.Value)
 	}
+	log.Println("READ" + string(requestMetric.MType) + "/" + database.Data.Read(requestMetric.ID))
 	//	switch requestMetric.MType {
 	//case metrics.MetricTypeGauge:
 	//	w.WriteHeader(http.StatusOK)

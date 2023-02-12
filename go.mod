@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
+	github.com/caarlos0/env/v6 v6.10.1
 	github.com/go-chi/chi v1.5.4
 	github.com/stretchr/testify v1.8.1
 )
