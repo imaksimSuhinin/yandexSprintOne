@@ -21,8 +21,8 @@ const (
 
 const (
 	scheme          string = "http"
-	host            string = "127.0.0.1"
-	port            string = "8080"
+	host            string = "127.0.0.1:8080"
+	httpUpdatePath  string = "/update/"
 	contentTypeKey  string = "Content-Type"
 	contentTypeText string = "text/plain"
 	contentTypeJSON string = "application/json"
@@ -115,7 +115,7 @@ func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 			mkey = field
 		}
 
-		url := NewURLConnectionString(scheme, host+":"+port, "/update/"+mtype+"/"+mkey+"/"+mval)
+		url := NewURLConnectionString(scheme, host, httpUpdatePath+mtype+"/"+mkey+"/"+mval)
 		var req, err = http.NewRequest(http.MethodPost, url, nil)
 		req.Header.Add(contentTypeKey, contentTypeText) // добавляем заголовок Accept
 
@@ -174,9 +174,9 @@ func (m *Metrics) PostMetricsJSON(httpClient *http.Client) error {
 
 		statJSON, _ := json.Marshal(OneMetrics)
 		fmt.Println(mkey)
-		url := NewURLConnectionString(scheme, host+":"+port, "/update/")
+		url := NewURLConnectionString(scheme, host, httpUpdatePath)
 		var req, err = http.NewRequest(http.MethodPost, url, bytes.NewBuffer(statJSON))
-		req.Header.Add(contentTypeKey, contentTypeJSON) // добавляем заголовок Accept
+		req.Header.Add(contentTypeKey, contentTypeJSON)
 		log.Println(statJSON)
 		resp, err = httpClient.Do(req)
 		if err != nil {

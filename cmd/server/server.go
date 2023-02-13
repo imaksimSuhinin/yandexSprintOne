@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
 	"github.com/imaksimSuhinin/yandexSprintOne/internal/data"
 	"github.com/imaksimSuhinin/yandexSprintOne/internal/handlers"
 	os "github.com/imaksimSuhinin/yandexSprintOne/internal/os"
@@ -28,10 +27,6 @@ func main() {
 
 func startServer(template *template.Template) {
 	r := chi.NewRouter()
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
 
 	r.MethodFunc(http.MethodGet, "/", func(writer http.ResponseWriter, request *http.Request) {
 		handlers.ShowMetrics(writer, request, template)
