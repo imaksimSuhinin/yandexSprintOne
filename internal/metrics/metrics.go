@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/imaksimSuhinin/yandexSprintOne/internal/config"
 	"log"
 	"math/rand"
 	"net/http"
@@ -115,7 +116,7 @@ func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 			mkey = field
 		}
 
-		url := NewURLConnectionString(scheme, host+":"+port, "/update/"+mtype+"/"+mkey+"/"+mval)
+		url := NewURLConnectionString(scheme, config.AppConfig.ServerAddr, "/update/"+mtype+"/"+mkey+"/"+mval)
 		var req, err = http.NewRequest(http.MethodPost, url, nil)
 		req.Header.Add(contentTypeKey, contentTypeText) // добавляем заголовок Accept
 
@@ -174,7 +175,7 @@ func (m *Metrics) PostMetricsJSON(httpClient *http.Client) error {
 
 		statJSON, _ := json.Marshal(OneMetrics)
 		fmt.Println(mkey)
-		url := NewURLConnectionString(scheme, host+":"+port, "/update/")
+		url := NewURLConnectionString(scheme, config.AppConfig.ServerAddr, "/update/")
 		var req, err = http.NewRequest(http.MethodPost, url, bytes.NewBuffer(statJSON))
 		req.Header.Add(contentTypeKey, contentTypeJSON) // добавляем заголовок Accept
 		log.Println(statJSON)

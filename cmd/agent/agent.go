@@ -19,8 +19,8 @@ func main() {
 	var metrics loc_metric.Metrics
 	var client = startClient()
 
-	upload := time.NewTicker(config.AppConfig.ReportInterval * time.Second)
-	refresh := time.NewTicker(config.AppConfig.PollInterval * time.Second)
+	upload := time.NewTicker(config.AppConfig.ReportInterval)
+	refresh := time.NewTicker(config.AppConfig.PollInterval)
 
 	for {
 		select {
