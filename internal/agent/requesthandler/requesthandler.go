@@ -17,14 +17,13 @@ import (
 func oneStatUpload(httpClient *resty.Client, statType string, statName string, statValue string) error {
 	resp, err := httpClient.R().
 		SetPathParams(map[string]string{
-			"host":  config.ConfigServerHost,
-			"port":  strconv.Itoa(config.ConfigServerPort),
+			"host":  config.AppConfig.ServerAddr,
 			"type":  statType,
 			"name":  statName,
 			"value": statValue,
 		}).
 		SetHeader("Content-Type", "text/plain").
-		Post("http://{host}:{port}/update/{type}/{name}/{value}")
+		Post("http://{host}/update/{type}/{name}/{value}")
 
 	if err != nil {
 		return err
@@ -73,10 +72,9 @@ func oneStatUploadJSON(httpClient *resty.Client, statType string, statName strin
 		SetHeader("Content-Type", "application/json").
 		SetBody(string(statJSON)).
 		SetPathParams(map[string]string{
-			"host": config.ConfigServerHost,
-			"port": strconv.Itoa(config.ConfigServerPort),
+			"host": config.AppConfig.ServerAddr,
 		}).
-		Post("http://{host}:{port}/update/")
+		Post("http://{host}/update/")
 	//Post("http://{host}:{port}/update/")
 
 	if err != nil {

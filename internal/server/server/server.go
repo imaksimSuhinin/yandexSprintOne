@@ -1,14 +1,13 @@
 package server
 
 import (
-	"fmt"
 	"github.com/go-chi/chi/middleware"
 	"log"
+	"metrics/internal/server/config"
 	"net/http"
 	"time"
 
 	"github.com/go-chi/chi"
-	"metrics/internal/server/config"
 	"metrics/internal/server/handlers"
 	"metrics/internal/server/storage"
 )
@@ -64,6 +63,8 @@ func (server *Server) Run() {
 	memStatsStorage := storage.NewMemStatsMemoryRepo()
 	server.chiRouter = newRouter(memStatsStorage)
 
-	fullHostAddr := fmt.Sprintf("%v:%v", config.ConfigHostname, config.ConfigPort)
-	log.Fatal(http.ListenAndServe(fullHostAddr, server.chiRouter))
+	//	fullHostAddr := fmt.Sprintf("%v:%v", config.AppConfig.ServerAddr, config.ConfigPort)
+	//	log.Fatal(http.ListenAndServe(fullHostAddr, server.chiRouter))
+	log.Fatal(http.ListenAndServe(config.AppConfig.ServerAddr, server.chiRouter))
+
 }
