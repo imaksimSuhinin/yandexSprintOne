@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/asaskevich/govalidator"
 	"github.com/go-chi/chi"
 	"github.com/imaksimSuhinin/yandexSprintOne/internal/converter"
@@ -56,7 +55,7 @@ func ShowMetrics(w http.ResponseWriter, r *http.Request, template *template.Temp
 			stringMetricMap.mtype = metrics.MetricTypeCounter
 			stringMetricMap.value = vars(r, MetricValue)
 			metricStringMap[k] = stringMetricMap
-			log.Println("here" + string(vars(r, MetricValue)))
+			//	log.Println("here" + string(vars(r, MetricValue)))
 		}
 
 	}
@@ -80,7 +79,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var m metricValue
 	vars := chi.URLParam
-	log.Println("here" + string(vars(r, MetricValue)))
+	//	log.Println("here" + string(vars(r, MetricValue)))
 	switch vars(r, MetricType) {
 	case metrics.MetricTypeGauge:
 		f, err := strconv.ParseFloat(vars(r, MetricValue), 64)
@@ -136,7 +135,7 @@ func PostMetricHandler(w http.ResponseWriter, r *http.Request) {
 
 		r.Body.Close()
 	}
-	log.Println(metricMap)
+	//	log.Println(metricMap)
 
 }
 
@@ -275,7 +274,7 @@ func ShowJSONValue(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(responseJSON)
-	fmt.Println("response:" + responseJSON.MType)
+	//	fmt.Println("response:" + responseJSON.MType)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

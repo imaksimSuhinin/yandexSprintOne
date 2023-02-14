@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -89,7 +88,7 @@ func (m *Metrics) UpdateMetrics() *Metrics {
 	m.PollCount = counter(PollCount)
 	rand.Seed(time.Now().Unix())
 	m.RandomValue = gauge(rand.Intn(10000) + 1)
-	log.Println("refresh...")
+	//log.Println("refresh...")
 
 	return m
 }
@@ -122,16 +121,14 @@ func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 		resp, err = httpClient.Do(req)
 		if err != nil {
 			fmt.Println(err)
-			defer resp.Body.Close()
+			return err
 		}
 		if resp.StatusCode != http.StatusOK {
 			return errors.New("HTTP Status != 200")
 		}
+		defer resp.Body.Close()
 	}
-	defer resp.Body.Close()
-
-	log.Println("Post...")
-
+	//log.Println("Post...")
 	return nil
 }
 func (m *Metrics) PostMetricsJSON(httpClient *http.Client) error {
@@ -173,23 +170,23 @@ func (m *Metrics) PostMetricsJSON(httpClient *http.Client) error {
 		//	log.Println("PollCount:" + string(OneMetrics.Delta))
 
 		statJSON, _ := json.Marshal(OneMetrics)
-		fmt.Println(mkey)
+		//	fmt.Println(mkey)
 		url := NewURLConnectionString(scheme, host, httpUpdatePath)
 		var req, err = http.NewRequest(http.MethodPost, url, bytes.NewBuffer(statJSON))
 		req.Header.Add(contentTypeKey, contentTypeJSON)
-		log.Println(statJSON)
+		//log.Println(statJSON)
 		resp, err = httpClient.Do(req)
 		if err != nil {
 			fmt.Println(err)
-			resp.Body.Close()
+			return nil
 		}
 		if resp.StatusCode != http.StatusOK {
 			return errors.New("HTTP Status != 200")
 		}
+		defer resp.Body.Close()
 	}
-	defer resp.Body.Close()
 
-	log.Println("PostJSON...")
+	//log.Println("PostJSON...")
 
 	return nil
 }
