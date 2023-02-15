@@ -147,12 +147,12 @@ func (m *Metrics) PostMetricsJSON(httpClient *http.Client) error {
 	var resp *http.Response
 
 	for field, val := range inInterface {
-		var mkey, mtype, mval string
+		var mtype, mval string
 
 		if field != "PollCount" {
 			mtype = MetricTypeGauge
 			mval = strconv.FormatFloat(val, 'f', -1, 64)
-			mkey = field
+			//	mkey = field
 			OneMetrics.MType = mtype
 			OneMetrics.ID = mval
 
@@ -162,9 +162,9 @@ func (m *Metrics) PostMetricsJSON(httpClient *http.Client) error {
 		} else {
 			mtype = MetricTypeCounter
 			mval = strconv.FormatFloat(val, 'f', -1, 64)
-			mkey = field
+			//	mkey = field
 			OneMetrics.MType = mtype
-			OneMetrics.ID = mkey
+			//	OneMetrics.ID = mkey
 			OneMetrics.Delta, _ = strconv.ParseInt(mval, 10, 64)
 		}
 		//	log.Println("PollCount:" + string(OneMetrics.Delta))
