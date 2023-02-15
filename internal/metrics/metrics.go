@@ -84,6 +84,10 @@ func (m *Metrics) UpdateMetrics() *Metrics {
 	m.Frees = gauge(rtm.Frees)
 	m.LiveObjects = m.Mallocs - m.Frees
 	m.PauseTotalNs = gauge(rtm.PauseTotalNs)
+	m.HeapAlloc = gauge(rtm.HeapAlloc)
+	m.HeapInuse = gauge(rtm.HeapInuse)
+	m.HeapIdle = gauge(rtm.HeapIdle)
+	m.HeapObjects = gauge(rtm.HeapObjects)
 	m.NumGC = gauge(rtm.NumGC)
 	m.PollCount = counter(PollCount)
 	rand.Seed(time.Now().Unix())
