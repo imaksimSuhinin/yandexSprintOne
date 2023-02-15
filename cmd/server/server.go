@@ -50,7 +50,7 @@ func startServer(template *template.Template) {
 		func(writer http.ResponseWriter, request *http.Request) {
 			handlers.PostMetricHandler(writer, request)
 		})
-	r.MethodFunc(http.MethodPost, "/update",
+	r.MethodFunc(http.MethodPost, "/update/",
 		func(writer http.ResponseWriter, request *http.Request) {
 			handlers.PostJSONMetricHandler(writer, request)
 		})
