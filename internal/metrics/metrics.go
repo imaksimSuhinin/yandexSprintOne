@@ -90,7 +90,7 @@ func (m *Metrics) UpdateMetrics() *Metrics {
 	m.HeapIdle = gauge(rtm.HeapIdle)
 	m.HeapObjects = gauge(rtm.HeapObjects)
 	m.NumGC = gauge(rtm.NumGC)
-	m.PollCount = counter(PollCount)
+	//m.PollCount = counter(PollCount)
 	rand.Seed(time.Now().Unix())
 	m.RandomValue = gauge(rand.Intn(10000) + 1)
 	//log.Println("refresh...")
