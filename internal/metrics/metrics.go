@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/imaksimSuhinin/yandexSprintOne/internal/config"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -89,7 +90,7 @@ func (m *Metrics) UpdateMetrics() *Metrics {
 	m.HeapIdle = gauge(rtm.HeapIdle)
 	m.HeapObjects = gauge(rtm.HeapObjects)
 	m.NumGC = gauge(rtm.NumGC)
-	m.PollCount = counter(PollCount)
+	//m.PollCount = counter(PollCount)
 	rand.Seed(time.Now().Unix())
 	m.RandomValue = gauge(rand.Intn(10000) + 1)
 	//log.Println("refresh...")
@@ -98,7 +99,7 @@ func (m *Metrics) UpdateMetrics() *Metrics {
 }
 
 func (m *Metrics) PostMetrics(httpClient *http.Client) error {
-
+	conf := config.New()
 	b, _ := json.Marshal(&m)
 	var inInterface map[string]float64
 	json.Unmarshal(b, &inInterface)
@@ -118,7 +119,7 @@ func (m *Metrics) PostMetrics(httpClient *http.Client) error {
 			mkey = field
 		}
 
-		url := NewURLConnectionString(scheme, host, httpUpdatePath+mtype+"/"+mkey+"/"+mval)
+		url := NewURLConnectionString(scheme, conf.AgentConfig.ServerAddr, httpUpdatePath+mtype+"/"+mkey+"/"+mval)
 		var req, err = http.NewRequest(http.MethodPost, url, nil)
 		req.Header.Add(contentTypeKey, contentTypeText) // добавляем заголовок Accept
 
@@ -175,7 +176,8 @@ func (m *Metrics) PostMetricsJSON(httpClient *http.Client) error {
 
 		statJSON, _ := json.Marshal(OneMetrics)
 		//	fmt.Println(mkey)
-		url := NewURLConnectionString(scheme, host, httpUpdatePath)
+		conf := config.New()
+		url := NewURLConnectionString(scheme, conf.AgentConfig.ServerAddr, httpUpdatePath)
 		var req, err = http.NewRequest(http.MethodPost, url, bytes.NewBuffer(statJSON))
 		req.Header.Add(contentTypeKey, contentTypeJSON)
 		//log.Println(statJSON)
