@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/imaksimSuhinin/yandexSprintOne/internal/config"
 	"github.com/imaksimSuhinin/yandexSprintOne/internal/data"
 	"github.com/imaksimSuhinin/yandexSprintOne/internal/handlers"
 	os "github.com/imaksimSuhinin/yandexSprintOne/internal/os"
@@ -55,8 +56,10 @@ func startServer(template *template.Template) {
 			handlers.PostJSONMetricHandler(writer, request)
 		})
 
+	conf := config.New()
+
 	httpServer := &http.Server{
-		Addr:    httpServerAddress,
+		Addr:    conf.ServerConfig.ServerAddr,
 		Handler: r,
 	}
 

@@ -1,25 +1,27 @@
 package main
 
 import (
+	"github.com/imaksimSuhinin/yandexSprintOne/internal/config"
 	loc_metric "github.com/imaksimSuhinin/yandexSprintOne/internal/metrics"
 	"github.com/imaksimSuhinin/yandexSprintOne/internal/os"
 	"net/http"
 	"time"
 )
 
-const (
-	delayRefresh      time.Duration = 2
-	delayUpload       time.Duration = 10
-	httpClientTimeOut time.Duration = 20
-)
+//const (
+//	delayRefresh      time.Duration = 2
+//	delayUpload       time.Duration = 10
+//	httpClientTimeOut time.Duration = 20
+//)
 
 func main() {
+	conf := config.New()
 
 	var metrics loc_metric.Metrics
-	var client = startClient()
+	var client = startClient(*conf)
 
-	upload := time.NewTicker(delayUpload * time.Second)
-	refresh := time.NewTicker(delayRefresh * time.Second)
+	upload := time.NewTicker(conf.AgentConfig.ReportInterval * time.Second)
+	refresh := time.NewTicker(conf.AgentConfig.PollInterval * time.Second)
 
 	for {
 		select {
@@ -34,9 +36,9 @@ func main() {
 	}
 }
 
-func startClient() *http.Client {
+func startClient(conf config.Config) *http.Client {
 	client := &http.Client{
-		Timeout: httpClientTimeOut * time.Second,
+		Timeout: conf.AgentConfig.HTTPClientTimeOut * time.Second,
 	}
 
 	return client
