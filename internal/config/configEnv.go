@@ -1,6 +1,7 @@
 package config
 
 import (
+	"flag"
 	"os"
 	"strconv"
 	"time"
@@ -36,6 +37,7 @@ func New() *Config {
 		},
 		DebugMode: getEnvAsBool("DEBUG_MODE", true),
 	}
+
 }
 
 func getEnv(key string, defaultVal string) string {
@@ -62,4 +64,11 @@ func getEnvAsBool(name string, defaultVal bool) bool {
 	}
 
 	return defaultVal
+}
+
+func (config *Config) ParseFlags() {
+	flag.StringVar(&config.ServerConfig.ServerAddr, "a", config.ServerConfig.ServerAddr, "server address (host:port)")
+	flag.DurationVar(&config.AgentConfig.ReportInterval, "r", config.AgentConfig.ReportInterval, "report interval (example: 10s)")
+	flag.DurationVar(&config.AgentConfig.PollInterval, "p", config.AgentConfig.PollInterval, "poll interval (example: 10s)")
+	flag.Parse()
 }

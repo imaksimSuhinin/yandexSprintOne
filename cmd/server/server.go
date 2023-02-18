@@ -57,6 +57,7 @@ func startServer(template *template.Template) {
 		})
 
 	conf := config.New()
+	conf.ParseFlags()
 
 	httpServer := &http.Server{
 		Addr:    conf.ServerConfig.ServerAddr,

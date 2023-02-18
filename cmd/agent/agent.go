@@ -8,14 +8,9 @@ import (
 	"time"
 )
 
-//const (
-//	delayRefresh      time.Duration = 2
-//	delayUpload       time.Duration = 10
-//	httpClientTimeOut time.Duration = 20
-//)
-
 func main() {
 	conf := config.New()
+	conf.ParseFlags()
 
 	var metrics loc_metric.Metrics
 	var client = startClient(*conf)
