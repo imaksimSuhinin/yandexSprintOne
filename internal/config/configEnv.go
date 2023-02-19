@@ -2,6 +2,7 @@ package config
 
 import (
 	"flag"
+	"log"
 	"os"
 	"strconv"
 	"time"
@@ -21,7 +22,13 @@ type GitServerConfig struct {
 type Config struct {
 	AgentConfig  GitAgentConfig
 	ServerConfig GitServerConfig
-	DebugMode    bool
+	Store        Store
+}
+
+type Store struct {
+	Interval time.Duration `env:"STORE_INTERVAL" envDefault:"300s"`
+	File     string        `env:"STORE_FILE" envDefault:"/tmp/devops-metrics-db.json"`
+	Restore  bool          `env:"RESTORE" envDefault:"true"`
 }
 
 func New() *Config {
@@ -35,10 +42,25 @@ func New() *Config {
 		ServerConfig: GitServerConfig{
 			ServerAddr: getEnv("ADDRESS", "127.0.0.1:8080"),
 		},
-		DebugMode: getEnvAsBool("DEBUG_MODE", true),
+		Store: Store{
+			Interval: time.Duration(getEnvAsTime("STORE_INTERVAL", 300)),
+			File:     getEnv("STORE_FILE", "/tmp/devops-metrics-db.json"),
+			Restore:  getEnvAsBool("RESTORE", true),
+		},
+	}
+}
+
+func LoadConfig() Config {
+	var config Config
+	err := New()
+	if err != nil {
+		log.Fatal(err)
 	}
 
+	return config
 }
+
+var AppConfig Config = LoadConfig()
 
 func getEnv(key string, defaultVal string) string {
 	if value, exists := os.LookupEnv(key); exists {
